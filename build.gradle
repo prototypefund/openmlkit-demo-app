@@ -1,10 +1,37 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
 plugins {
     id 'com.android.application' version '7.1.2' apply false
     id 'com.android.library' version '7.1.2' apply false
     id 'org.jetbrains.kotlin.android' version '1.6.10' apply false
+    id 'maven-publish'
 }
 
 task clean(type: Delete) {
     delete rootProject.buildDir
+}
+
+publishing {
+    publications {
+        library(MavenPublication) {
+            groupId "io.krasch"
+            artifactId "openread"
+            version "0.0.1-SNAPSHOT"
+            artifact "openread/build/outputs/aar/openread-release.aar"
+        }
+    }
+    repositories {
+        maven {
+            url "https://gitlab.com/api/v4/projects/38250497/packages/maven"
+            /*credentials(HttpHeaderCredentials) {
+                name = "Private-Token"
+                value = gitLabPrivateToken
+            }*/
+            credentials(HttpHeaderCredentials) {
+                name = 'Job-Token'
+                value = System.getenv("CI_JOB_TOKEN")
+            }
+            authentication {
+                header(HttpHeaderAuthentication)
+            }
+        }
+    }
 }
