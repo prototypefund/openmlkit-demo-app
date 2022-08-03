@@ -10,7 +10,6 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
-
 publishing {
     publications {
         library(MavenPublication) {
