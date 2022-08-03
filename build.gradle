@@ -3,6 +3,7 @@ plugins {
     id 'com.android.library' version '7.1.2' apply false
     id 'org.jetbrains.kotlin.android' version '1.6.10' apply false
     id 'maven-publish'
+    id 'org.jlleitschuh.gradle.ktlint' version '10.3.0'
 }
 
 task clean(type: Delete) {
@@ -14,21 +15,37 @@ publishing {
         library(MavenPublication) {
             groupId "io.krasch"
             artifactId "openread"
-            version "0.0.1-SNAPSHOT"
+            version "0.0.2"
             artifact "openread/build/outputs/aar/openread-release.aar"
+
+            pom.withXml {
+                def dependencies = asNode().appendNode('dependencies')
+
+                def dependency = dependencies.appendNode('dependency')
+                dependency.appendNode('groupId', 'org.tensorflow')
+                dependency.appendNode('artifactId', 'tensorflow-lite')
+                dependency.appendNode('version', '2.8.0')
+
+                /*configurations.getByName("compileClasspath").getResolvedConfiguration().getFirstLevelModuleDependencies().each {
+                    def dependency = dependencies.appendNode('dependency')
+                    dependency.appendNode('groupId', it.moduleGroup)
+                    dependency.appendNode('artifactId', it.moduleName)
+                    dependency.appendNode('version', it.moduleVersion)
+                }*/
+            }
         }
     }
     repositories {
         maven {
             url "https://gitlab.com/api/v4/projects/38250497/packages/maven"
-            /*credentials(HttpHeaderCredentials) {
+            credentials(HttpHeaderCredentials) {
                 name = "Private-Token"
                 value = gitLabPrivateToken
-            }*/
-            credentials(HttpHeaderCredentials) {
+            }
+            /*credentials(HttpHeaderCredentials) {
                 name = 'Job-Token'
                 value = System.getenv("CI_JOB_TOKEN")
-            }
+            }*/
             authentication {
                 header(HttpHeaderAuthentication)
             }

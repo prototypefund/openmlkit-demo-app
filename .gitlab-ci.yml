@@ -50,10 +50,15 @@ before_script:
   # Not necessary, but just to make sure
   - chmod +x ./gradlew
 
-test:
+test_and_publish:
+  stage: test
   script:
-    #- ./gradlew -Pci --console=plain :app:lintDebug -PbuildDir=lint
-    #- ./gradlew -Pci --console=plain ktlintCheck
-    #- ./gradlew -Pci --console=plain :app:testDebug
+    # lint
+    - ./gradlew -Pci --console=plain lintDebug -PbuildDir=lint
+    - ./gradlew -Pci --console=plain ktlintCheck
+    # test
+    - ./gradlew -Pci --console=plain clean # to make sure that rest results are reported
+    - ./gradlew -Pci --console=plain test
+    # publish
     - ./gradlew -Pci --console=plain build
     - ./gradlew -Pci --console=plain publish
