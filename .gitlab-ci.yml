@@ -18,4 +18,4 @@ publish:
   script:
     - export RELEASE_VERSION=$CI_COMMIT_TAG
     - ./gradlew -Pci --console=plain :openread:build
-    - ./gradlew -Pci --console=plain :openread:publish
+    - ./gradlew -Pci --console=plain publish
