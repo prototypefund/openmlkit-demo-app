@@ -2,6 +2,7 @@ plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
     id 'org.jlleitschuh.gradle.ktlint'
+    id 'de.undercouch.download'
 }
 
 android {
@@ -40,9 +41,17 @@ android {
     }
 }
 
+task downloadModels(type: Download) {
+    src(['https://storage.googleapis.com/openreadmodels/craft-mini-116__epoch18.tflite',
+         'https://storage.googleapis.com/openreadmodels/lite-model_keras-ocr_float16_2.tflite'])
+    dest 'src/main/assets'
+}
+
+preBuild.dependsOn downloadModels
+
 dependencies {
 
-    implementation 'androidx.core:core-ktx:1.7.0'
+    implementation 'androidx.core:core-ktx:1.8.0'
     implementation 'androidx.appcompat:appcompat:1.4.2'
     implementation 'com.google.android.material:material:1.6.1'
     implementation 'org.tensorflow:tensorflow-lite:2.8.0'
