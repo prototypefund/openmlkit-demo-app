@@ -6,6 +6,17 @@ plugins {
     id 'org.jlleitschuh.gradle.ktlint' version '10.3.0'
 }
 
+// todo this same code also appears in settings.gradle, possible to just import from there
+// default token settings for interacting with gitlab maven repository when running locally
+def tokenName = 'Private-Token'
+def tokenValue = gitLabPrivateToken
+
+// when running on CI, need to use different token settings
+if (System.getenv("CI_JOB_TOKEN")){
+    tokenName = 'Job-Token'
+    tokenValue = System.getenv("CI_JOB_TOKEN")
+}
+
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
@@ -53,13 +64,9 @@ publishing {
     repositories {
         maven {
             url "https://gitlab.com/api/v4/projects/38250497/packages/maven"
-            /*credentials(HttpHeaderCredentials) {
-                name = "Private-Token"
-                value = gitLabPrivateToken
-            }*/
             credentials(HttpHeaderCredentials) {
-                name = 'Job-Token'
-                value = System.getenv("CI_JOB_TOKEN")
+                name = tokenName
+                value = tokenValue
             }
             authentication {
                 header(HttpHeaderAuthentication)

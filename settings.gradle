@@ -5,6 +5,17 @@ pluginManagement {
         mavenCentral()
     }
 }
+
+// default token settings for interacting with gitlab maven repository when running locally
+def tokenName = 'Private-Token'
+def tokenValue = gitLabPrivateToken
+
+// when running on CI, need to use different token settings
+if (System.getenv("CI_JOB_TOKEN")){
+    tokenName = 'Job-Token'
+    tokenValue = System.getenv("CI_JOB_TOKEN")
+}
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
@@ -13,8 +24,8 @@ dependencyResolutionManagement {
         maven {
             url "https://gitlab.com/api/v4/projects/38250497/packages/maven"
             credentials(HttpHeaderCredentials) {
-                name = "Private-Token"
-                value = gitLabPrivateToken
+                name = tokenName
+                value = tokenValue
             }
             authentication {
                 header(HttpHeaderAuthentication)
