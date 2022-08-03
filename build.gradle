@@ -7,15 +7,20 @@ plugins {
 }
 
 // todo this same code also appears in settings.gradle, possible to just import from there
-// default token settings for interacting with gitlab maven repository when running locally
-def tokenName = 'Private-Token'
-def tokenValue = gitLabPrivateToken
+def tokenName = null
+def tokenValue = null
 
-// when running on CI, need to use different token settings
-if (System.getenv("CI_JOB_TOKEN")){
+// running locally
+if (System.getenv("CI_JOB_TOKEN") == null){
+    tokenName = 'Private-Token'
+    tokenValue = gitLabPrivateToken
+}
+// running on CI
+else {
     tokenName = 'Job-Token'
     tokenValue = System.getenv("CI_JOB_TOKEN")
 }
+
 
 task clean(type: Delete) {
     delete rootProject.buildDir

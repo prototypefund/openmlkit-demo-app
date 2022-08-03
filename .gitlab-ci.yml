@@ -7,12 +7,9 @@ stages:
 test:
   stage: test
   script:
-    # lint
-    - ./gradlew -Pci --console=plain lintDebug -PbuildDir=lint
-    - ./gradlew -Pci --console=plain ktlintCheck
-    # test
-    - ./gradlew -Pci --console=plain clean # to make sure that rest results are reported
-    - ./gradlew -Pci --console=plain test
+    - ./gradlew -Pci --console=plain :openread:lintDebug -PbuildDir=lint
+    - ./gradlew -Pci --console=plain :openread:ktlintCheck
+    - ./gradlew -Pci --console=plain :openread:test
 
 publish:
   stage: publish
@@ -20,5 +17,5 @@ publish:
     - tags
   script:
     - export RELEASE_VERSION=$CI_COMMIT_TAG
-    - ./gradlew -Pci --console=plain build
-    - ./gradlew -Pci --console=plain publish
+    - ./gradlew -Pci --console=plain :openread:build
+    - ./gradlew -Pci --console=plain :openread:publish
