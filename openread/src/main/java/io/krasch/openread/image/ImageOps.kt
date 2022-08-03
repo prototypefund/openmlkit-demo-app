@@ -1,6 +1,10 @@
 package io.krasch.openread.image
 
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Matrix
+import android.graphics.Paint
 import io.krasch.openread.geometry.types.Angle
 import io.krasch.openread.geometry.types.AngledRectangle
 import io.krasch.openread.geometry.types.Point

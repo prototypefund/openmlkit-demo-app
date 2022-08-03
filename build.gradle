@@ -10,13 +10,14 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
+
 publishing {
     publications {
         library(MavenPublication) {
-            groupId "io.krasch"
-            artifactId "openread"
-            version "0.0.2"
-            artifact "openread/build/outputs/aar/openread-release.aar"
+            groupId 'io.krasch'
+            artifactId 'openread'
+            version System.getenv('RELEASE_VERSION')
+            artifact 'openread/build/outputs/aar/openread-release.aar'
 
             pom.withXml {
                 def dependencies = asNode().appendNode('dependencies')
@@ -38,14 +39,14 @@ publishing {
     repositories {
         maven {
             url "https://gitlab.com/api/v4/projects/38250497/packages/maven"
-            credentials(HttpHeaderCredentials) {
+            /*credentials(HttpHeaderCredentials) {
                 name = "Private-Token"
                 value = gitLabPrivateToken
-            }
-            /*credentials(HttpHeaderCredentials) {
+            }*/
+            credentials(HttpHeaderCredentials) {
                 name = 'Job-Token'
                 value = System.getenv("CI_JOB_TOKEN")
-            }*/
+            }
             authentication {
                 header(HttpHeaderAuthentication)
             }
