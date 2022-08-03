@@ -21,10 +21,25 @@ publishing {
             pom.withXml {
                 def dependencies = asNode().appendNode('dependencies')
 
-                def dependency = dependencies.appendNode('dependency')
-                dependency.appendNode('groupId', 'org.tensorflow')
-                dependency.appendNode('artifactId', 'tensorflow-lite')
-                dependency.appendNode('version', '2.8.0')
+                def tensorflow = dependencies.appendNode('dependency')
+                tensorflow.appendNode('groupId', 'org.tensorflow')
+                tensorflow.appendNode('artifactId', 'tensorflow-lite')
+                tensorflow.appendNode('version', '2.8.0')
+
+                def tensorflow_support = dependencies.appendNode('dependency')
+                tensorflow_support.appendNode('groupId', 'org.tensorflow')
+                tensorflow_support.appendNode('artifactId', 'tensorflow-lite-support')
+                tensorflow_support.appendNode('version', '0.3.0')
+
+                def tensorflow_ops = dependencies.appendNode('dependency')
+                tensorflow_ops.appendNode('groupId', 'org.tensorflow')
+                tensorflow_ops.appendNode('artifactId', 'tensorflow-lite-select-tf-ops')
+                tensorflow_ops.appendNode('version', '2.8.0')
+
+                def tensorflow_gpu = dependencies.appendNode('dependency')
+                tensorflow_gpu.appendNode('groupId', 'org.tensorflow')
+                tensorflow_gpu.appendNode('artifactId', 'tensorflow-lite-gpu')
+                tensorflow_gpu.appendNode('version', '2.8.0')
 
                 /*configurations.getByName("compileClasspath").getResolvedConfiguration().getFirstLevelModuleDependencies().each {
                     def dependency = dependencies.appendNode('dependency')

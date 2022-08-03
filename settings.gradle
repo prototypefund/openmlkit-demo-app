@@ -10,8 +10,19 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven {
+            url "https://gitlab.com/api/v4/projects/38250497/packages/maven"
+            credentials(HttpHeaderCredentials) {
+                name = "Private-Token"
+                value = gitLabPrivateToken
+            }
+            authentication {
+                header(HttpHeaderAuthentication)
+            }
+        }
     }
 }
+
 rootProject.name = "openread"
 include ':app'
 include ':openread'
