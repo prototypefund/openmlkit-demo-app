@@ -37,10 +37,9 @@ class MainActivity : AppCompatActivity() {
         // when OCR is starting: update UI and trigger the models
         fun runOCR(bitmap: Bitmap?){
             bitmap?.run {
-                val square = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.width)
-                currentImage = square
-                binding.imageView.setImageBitmap(square)
-                viewModel.triggerOCR(square)
+                currentImage = bitmap
+                binding.imageView.setImageBitmap(bitmap)
+                viewModel.triggerOCR(bitmap)
             }
         }
 
@@ -49,8 +48,8 @@ class MainActivity : AppCompatActivity() {
         binding.button.setOnClickListener { pickImage.launch(0) }
 
         // automatically trigger OCR (for testing purposes)
-        val bitmap = BitmapFactory.decodeStream(assets.open("seelowen.jpg"))
-        runOCR(bitmap)
+        //val bitmap = BitmapFactory.decodeStream(assets.open("seelowen.jpg"))
+        //runOCR(bitmap)
 
     }
 }

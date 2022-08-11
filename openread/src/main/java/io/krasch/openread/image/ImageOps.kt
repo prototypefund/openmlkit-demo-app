@@ -11,6 +11,7 @@ import io.krasch.openread.geometry.types.Point
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.floor
+import kotlin.math.min
 import kotlin.math.sin
 
 fun resize(
@@ -26,6 +27,38 @@ fun resize(
     val scaled = scale(image, targetWidth, targetHeight)
     // Log.v("bla", "${image.width} ${image.height} -> ${scaled.width} ${scaled.height}")
     return pad(scaled, targetWidth, targetHeight)
+}
+
+fun resize2(
+    image: Bitmap,
+    targetWidth: Int,
+    targetHeight: Int
+): Pair<Double, Bitmap> {
+
+    // todo
+    require(targetWidth <= image.width)
+    require(targetHeight <= image.height)
+
+    val widthResizeRatio = targetWidth.toDouble() / image.width
+    val heightResizeRatio = targetHeight.toDouble() / image.height
+
+    val resizeRatio = min(widthResizeRatio, heightResizeRatio)
+
+    val newWidth = resizeRatio * image.width
+    val newHeight = resizeRatio * image.height
+
+    val scaled = Bitmap.createScaledBitmap(image, newWidth.toInt(), newHeight.toInt(), true)
+
+    // todo
+    require(targetWidth >= newWidth)
+    require(targetHeight >= newHeight)
+
+    val padRight = targetWidth - newWidth
+    val padBottom = targetHeight - newHeight
+
+    val padded = pad(scaled, left = 0.0, top = 0.0, right = padRight, bottom = padBottom)
+
+    return Pair(resizeRatio, padded)
 }
 
 fun scale(image: Bitmap, maxWidth: Int, maxHeight: Int): Bitmap {
@@ -102,21 +135,6 @@ fun ensureRectFitsIntoImage(image: Bitmap, rect: AngledRectangle): Pair<Bitmap, 
     )
 
     return Pair(adjustedImage, adjustedRect)
-}
-
-fun expandRect(rect: AngledRectangle, ratio: Double): AngledRectangle {
-    val diffWidth = rect.width * ratio
-    val diffHeight = rect.height * ratio
-
-    val shiftBottomLeft = Point(-diffWidth / 2.0, + diffHeight / 2.0)
-    val newBottomLeft = (rect.bottomLeft.rotate(-rect.angleBottom) + shiftBottomLeft).rotate(rect.angleBottom)
-
-    return AngledRectangle(
-        newBottomLeft,
-        rect.width + diffWidth,
-        rect.height + diffHeight,
-        rect.angleBottom
-    )
 }
 
 fun rotateAndCutout(image: Bitmap, rect: AngledRectangle): Bitmap {

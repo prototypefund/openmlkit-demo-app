@@ -2,8 +2,8 @@ package io.krasch.openread.geometry.types
 
 class Array2D<T>(
     private val data: Array<T>,
-    val width: Int,
-    val height: Int
+    val height: Int,
+    val width: Int
 ) {
 
     init {
@@ -11,28 +11,28 @@ class Array2D<T>(
             throw IllegalArgumentException("2D array shape does not match array data")
     }
 
-    operator fun get(x: Int, y: Int) = data[get1DIndex(x, y)]
+    operator fun get(row: Int, col: Int) = data[get1DIndex(row, col)]
 
-    operator fun set(x: Int, y: Int, value: T) {
-        data[get1DIndex(x, y)] = value
+    operator fun set(row: Int, col: Int, value: T) {
+        data[get1DIndex(row, col)] = value
     }
 
-    fun isValidCoordinate(x: Int, y: Int): Boolean {
+    fun isValidCoordinate(row: Int, col: Int): Boolean {
         return (
-            (x > 0) and
-                (x < width) and
-                (y > 0) and
-                (y < height)
+            (row >= 0) and
+                (row < height) and
+                (col >= 0) and
+                (col < width)
             )
     }
 
-    private fun get1DIndex(x: Int, y: Int): Int {
-        if ((x < 0) or (x >= width))
-            throw ArrayIndexOutOfBoundsException("width=$width x=$x")
+    private fun get1DIndex(row: Int, col: Int): Int {
+        if ((col < 0) or (col >= width))
+            throw ArrayIndexOutOfBoundsException("width=$width col=$col")
 
-        if ((y < 0) or (y >= height))
-            throw ArrayIndexOutOfBoundsException("height=$height y=$y")
+        if ((row < 0) or (row >= height))
+            throw ArrayIndexOutOfBoundsException("height=$height row=$row")
 
-        return y * height + x
+        return row * width + col
     }
 }

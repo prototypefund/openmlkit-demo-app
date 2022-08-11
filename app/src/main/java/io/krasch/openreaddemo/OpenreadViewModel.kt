@@ -1,6 +1,7 @@
 package io.krasch.openreaddemo
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.lifecycle.*
 import io.krasch.openread.OCR
 import io.krasch.openread.OCRResult
@@ -10,7 +11,7 @@ import kotlinx.coroutines.flow.*
 fun <T> Flow<T>.accumulate(): Flow<List<T>> = flow {
     val accumulated = mutableListOf<T>()
     collect {
-        // Log.v("bla", it.toString())
+        Log.v("bla", it.toString())
         accumulated.add(it)
         emit(accumulated)
     }

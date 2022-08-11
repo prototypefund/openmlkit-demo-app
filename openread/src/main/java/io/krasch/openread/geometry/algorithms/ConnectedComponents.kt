@@ -2,82 +2,69 @@ package io.krasch.openread.geometry.algorithms
 
 import io.krasch.openread.geometry.types.Array2D
 
-// todo this should probably not be in here
-const val THRESHOLD_TEXT_FIRST_PASS = 0.1
-const val THRESHOLD_TEXT_SECOND_PASS = 0.7
-const val THRESHOLD_LINK = 0.1
+typealias Coordinate = Pair<Int, Int>
+typealias Component = Set<Coordinate>
 
-private fun getNeighbours(col: Int, row: Int): List<Pair<Int, Int>> {
+private fun getNeighbours(row: Int, col: Int): List<Pair<Int, Int>> {
     return listOf(
-        Pair(col - 1, row - 1),
-        Pair(col + 0, row - 1),
-        Pair(col + 1, row - 1),
-        Pair(col - 1, row + 0),
+        Pair(row - 1, col),
+        Pair(row + 1, col),
+        Pair(row, col - 1),
+        Pair(row, col + 1)
+        /*Pair(row - 1, col - 1),
+        Pair(row + 0, col - 1),
+        Pair(row + 1, col - 1),
+        Pair(row - 1, col + 0),
         // not (col + 0, row + 0) because that is the pixel itself!
-        Pair(col + 1, row + 0),
-        Pair(col - 1, row + 1),
-        Pair(col + 0, row + 1),
-        Pair(col + 1, row + 1)
+        Pair(row + 1, col + 0),
+        Pair(row - 1, col + 1),
+        Pair(row + 0, col + 1),
+        Pair(row + 1, col + 1)*/
     )
 }
 
 // todo should only text one array of threshold
-fun findConnectedComponents(
-    scoreText: Array2D<Float>,
-    scoreLink: Array2D<Float>
-) = sequence {
+fun findConnectedComponents(data: Array2D<Boolean>) = sequence<Component> {
 
     // init 2D boolean array for storing which pixel has been visited  / not visited
-    val visited_ = BooleanArray(scoreText.width * scoreText.height) { false }
-    val visited = Array2D(visited_.toTypedArray(), scoreText.width, scoreText.height)
+    val visited_ = BooleanArray(data.width * data.height) { false }
+    val visited = Array2D(visited_.toTypedArray(), data.height, data.width)
 
-    fun isText(col: Int, row: Int): Boolean {
-        return (scoreText[col, row] > THRESHOLD_TEXT_FIRST_PASS) or
-            (scoreLink[col, row] > THRESHOLD_LINK)
-    }
-
-    fun findConnectedNeighbours(startCol: Int, startRow: Int) = sequence {
+    fun findConnectedNeighbours(startRow: Int, startCol: Int) = sequence<Coordinate> {
         // the start pixel itself is part of the component
-        yield(Pair(startCol, startRow))
+        yield(Pair(startRow, startCol))
 
-        val neighbours = getNeighbours(startCol, startRow).toMutableList()
+        // neighbours are not filtered, might contain invalid coordinates!
+        val neighbours = getNeighbours(startRow, startCol).toMutableList()
 
         while (neighbours.isNotEmpty()) {
-            val (col, row) = neighbours.removeFirst()
+            val (row, col) = neighbours.removeFirst()
 
-            if (!scoreText.isValidCoordinate(col, row))
+            if (!data.isValidCoordinate(row, col))
                 continue
 
-            if (visited[col, row])
+            if (visited[row, col])
                 continue
 
-            visited[col, row] = true
+            visited[row, col] = true
 
-            if (isText(col, row)) {
-                yield(Pair(col, row)) // this neighbour is also part of the component
-                neighbours.addAll(getNeighbours(col, row))
+            if (data[row, col] == true) {
+                yield(Pair(row, col)) // this neighbour is also part of the component
+                neighbours.addAll(getNeighbours(row, col))
             }
         }
     }
 
-    for (col in 0 until scoreText.width) {
-        for (row in 0 until scoreText.height) {
+    for (row in 0 until data.height) {
+        for (col in 0 until data.width) {
 
-            if (visited[col, row])
+            if (visited[row, col])
                 continue
 
-            visited[col, row] = true
+            visited[row, col] = true
 
-            if (isText(col, row)) {
-                val component = findConnectedNeighbours(col, row).toList()
-
-                if (component.size < 10)
-                    continue
-
-                val maxTextScore = (component.map { scoreText[it.first, it.second] }).maxOf { it }
-                if (maxTextScore > THRESHOLD_TEXT_SECOND_PASS)
-                    yield(component)
-            }
+            if (data[row, col])
+                yield(findConnectedNeighbours(row, col).toSet())
         }
     }
 }
