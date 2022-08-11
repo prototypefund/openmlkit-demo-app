@@ -32,6 +32,8 @@ class RecognitionModel(modelFile: MappedByteBuffer, numThreads: Int = -1) {
         val word = chars.toCharArray().concatToString().split(" ")[0]
 
         return word
+
+        // return "test"
     }
 
     fun bitmapToByteBuffer(bitmap: Bitmap): ByteBuffer {

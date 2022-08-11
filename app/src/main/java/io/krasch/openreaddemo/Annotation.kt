@@ -4,7 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import io.krasch.openread.DetectionResult
+import io.krasch.openread.models.DetectionResult
 import io.krasch.openread.OCRResult
 import io.krasch.openread.geometry.types.AngledRectangle
 import io.krasch.openread.geometry.types.Point
@@ -30,7 +30,7 @@ fun drawOCRResults(bitmap: Bitmap, result: List<OCRResult>): Bitmap {
     for (r in result){
         //drawHull(canvas, r.detection.hull)
         drawBoundingBox(canvas, r.detection.rectangle)
-        //drawText(canvas, r)
+        drawText(canvas, r)
     }
 
     return mutable

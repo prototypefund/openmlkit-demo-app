@@ -1,4 +1,4 @@
-package io.krasch.openread
+package io.krasch.openread.models
 
 import android.graphics.Bitmap
 import android.util.Log
@@ -13,7 +13,6 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.MappedByteBuffer
 
-const val FLOAT_SIZE = 4
 const val IMAGE_SIZE = 640
 
 data class DetectionResult(
@@ -28,7 +27,7 @@ class DetectionModel(modelFile: MappedByteBuffer, numThreads: Int = -1) {
 
     val model = Interpreter(modelFile, options)
 
-    fun predict(bitmap: Bitmap): List<DetectionResult> {
+    fun predict(bitmap: Bitmap) = sequence<DetectionResult> {
         val ratio = bitmap.width.toDouble() / IMAGE_SIZE
         val scaled = Bitmap.createScaledBitmap(bitmap, IMAGE_SIZE, IMAGE_SIZE, false)
 
@@ -36,24 +35,23 @@ class DetectionModel(modelFile: MappedByteBuffer, numThreads: Int = -1) {
         val charHeatmap = allocateOutputBuffer(0)
         val linkHeatmap = allocateOutputBuffer(1)
 
-        Log.v("bla", "model run start")
+        Log.v("bla", "detection model run start")
         // measurePerformance("detection") {model.run(input, output)}
         model.runForMultipleInputsOutputs(arrayOf(input), mapOf(0 to charHeatmap, 1 to linkHeatmap))
-        Log.v("bla", "model run done")
+        Log.v("bla", "detection model run done")
 
         val textScore = parseOutput(charHeatmap)
         val linkScore = parseOutput(linkHeatmap)
-        val components = findConnectedComponents(textScore, linkScore).toList()
 
-        val result = components.map {
-            // val scaled = it.map { Point(it.first*2*ratio, it.second*2*ratio) }
-            val scaledComponent = it.map { Point(it.first * ratio, it.second * ratio) }
+        val components = findConnectedComponents(textScore, linkScore)
+
+        for (component in components) {
+            val scaledComponent = component.map { Point(it.first * ratio, it.second * ratio) }
             val hull = calculateConvexHull(scaledComponent)
             val rect = calculateMinAreaRectangle(hull)
-            if (rect != null) DetectionResult(scaledComponent, hull, rect) else null
+            if (rect != null)
+                yield(DetectionResult(scaledComponent, hull, rect))
         }
-
-        return result.filterNotNull()
     }
 
     fun bitmapToByteBuffer(bitmap: Bitmap): ByteBuffer {
