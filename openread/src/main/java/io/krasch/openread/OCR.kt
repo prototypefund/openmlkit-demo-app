@@ -18,20 +18,22 @@ class OCR(context: Context) {
     private val detection = DetectionModel(FileUtil.loadMappedFile(context, "craft-mini-126__epoch70_w720xh960.tflite"))
     private val recognition = RecognitionModel(FileUtil.loadMappedFile(context, "lite-model_keras-ocr_float16_2.tflite"), 4)
 
-    fun run(bitmap: Bitmap) = sequence<OCRResult> {
-        val detections = detection.run(bitmap)
+    fun run(bitmap: Bitmap): Sequence<OCRResult> {
+        val (heatmap, detections) = detection.run(bitmap)
 
-        for (box in detections) {
-            val expandedRect = expandRect(box.rectangle, 0.2)
+        val results = detections.map { box ->
+            /*val expandedRect = expandRect(box.rectangle, 0.2)
             val cutoutImage = rotateAndCutout(bitmap, expandedRect)
             val word = recognition.predict(cutoutImage)
 
             if (word == "")
-                yield(OCRResult(box, "-"))
+                OCRResult(box, "-")
             else
-                yield(OCRResult(box, word))
+                OCRResult(box, word)*/
 
-            // yield(OCRResult(box, ""))
+            OCRResult(box, "")
         }
+
+        return results
     }
 }

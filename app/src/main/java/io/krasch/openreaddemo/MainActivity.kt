@@ -59,6 +59,10 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+        /*viewModel.currentImage.observe(this, Observer {
+            binding.imageView.setImageBitmap(currentImage)
+        })*/
+
         // when OCR is starting: update UI and trigger the models
         fun runOCR(bitmap: Bitmap?){
             bitmap?.run {
@@ -75,11 +79,11 @@ class MainActivity : AppCompatActivity() {
                 runOCR(bitmap)
             }
         }
-        binding.button.setOnClickListener { pickImage.launch(0) }
+        //binding.button.setOnClickListener { pickImage.launch(0) }
 
         // automatically trigger OCR (for testing purposes)
-        //val bitmap = BitmapFactory.decodeStream(assets.open("seelowen.jpg"))
-        //runOCR(bitmap)
+        val bitmap = BitmapFactory.decodeStream(assets.open("seelowen.jpg"))
+        runOCR(bitmap)
 
     }
 }

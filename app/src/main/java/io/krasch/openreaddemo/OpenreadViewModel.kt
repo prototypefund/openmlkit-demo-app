@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.*
 fun <T> Flow<T>.accumulate(): Flow<List<T>> = flow {
     val accumulated = mutableListOf<T>()
     collect {
-        Log.v("bla", it.toString())
+        //Log.v("bla", it.toString())
         accumulated.add(it)
         emit(accumulated)
     }

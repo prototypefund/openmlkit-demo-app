@@ -1,7 +1,9 @@
 package io.krasch.openread.models
 
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.util.Log
+import androidx.core.graphics.scale
 import io.krasch.openread.geometry.algorithms.calculateConvexHull
 import io.krasch.openread.geometry.algorithms.calculateMinAreaRectangle
 import io.krasch.openread.geometry.algorithms.findConnectedComponents
@@ -13,6 +15,7 @@ import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.gpu.CompatibilityList
 import org.tensorflow.lite.gpu.GpuDelegate
 import java.nio.MappedByteBuffer
+import kotlin.math.floor
 
 const val THRESHOLD_TEXT_FIRST_PASS = 0.2
 const val THRESHOLD_TEXT_SECOND_PASS = 0.8
@@ -41,17 +44,17 @@ class DetectionModel(modelFile: MappedByteBuffer) {
 
     val model = Interpreter(modelFile, options)
 
-    fun run(bitmap: Bitmap) = sequence<DetectionResult> {
+    fun run(bitmap: Bitmap): Pair<Bitmap, Sequence<DetectionResult>> {
         // preprocessing
         val (_, inputHeight, inputWidth, _) = model.getInputTensor(0).shape()
         val (resizeRatio, resizedBitmap) = resize2(bitmap, inputWidth, inputHeight)
 
         // model prediction
         val (charHeatmap, linkHeatmap) = predict(resizedBitmap)
+        val heatmapImage = makeColourHeatmap(charHeatmap, 1 / resizeRatio)
 
-        // postprocessing
-        for (result in postprocess(charHeatmap, linkHeatmap, 1 / resizeRatio))
-            yield(result)
+        val boxes = postprocess(charHeatmap, linkHeatmap, 1 / resizeRatio)
+        return Pair(heatmapImage, boxes)
     }
 
     private fun predict(bitmap: Bitmap): Pair<Array<Float>, Array<Float>> {
@@ -129,5 +132,36 @@ class DetectionModel(modelFile: MappedByteBuffer) {
             if (rect != null)
                 yield(DetectionResult(scaledPoints, hull, rect))
         }
+    }
+
+    private fun makeColourHeatmap(charHeatmap: Array<Float>, resizeRatio: Double): Bitmap {
+        val (_, height, width, _) = model.getOutputTensor(0).shape()
+
+        val colourMap = listOf(
+            Color.rgb(0, 0, 127),
+            Color.rgb(0, 0, 241),
+            Color.rgb(0, 76, 255),
+            Color.rgb(0, 176, 255),
+            Color.rgb(41, 255, 205),
+            Color.rgb(124, 255, 121),
+            Color.rgb(205, 255, 41),
+            Color.rgb(255, 196, 0),
+            Color.rgb(255, 103, 0),
+            Color.rgb(241, 7, 0),
+        )
+
+
+        val pixels = charHeatmap.map {
+            val colourId = floor(it * colourMap.size).toInt()
+            colourMap[colourId]
+        }
+
+        val heatmapImage = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        heatmapImage.setPixels(pixels.toIntArray(), 0, width, 0, 0, width, height)
+
+        return heatmapImage.scale(
+            (width * resizeRatio).toInt(),
+            (height * resizeRatio).toInt()
+        )
     }
 }
