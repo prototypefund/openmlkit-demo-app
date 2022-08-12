@@ -1,8 +1,14 @@
 package io.krasch.openreaddemo
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.ImageDecoder
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
+import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.*
@@ -16,6 +22,25 @@ class MainActivity : AppCompatActivity() {
     private val viewModel: OpenreadViewModel by viewModels()
     private lateinit var currentImage: Bitmap
 
+    @Suppress("DEPRECATION")
+    private fun getBitmapFromURI(uri: Uri): Bitmap {
+        return when {
+            Build.VERSION.SDK_INT < 28 -> MediaStore.Images.Media.getBitmap(
+                this.contentResolver,
+                uri
+            )
+            else -> {
+                val source = ImageDecoder.createSource(this.contentResolver, uri)
+                ImageDecoder.decodeBitmap(
+                    source,
+                    ImageDecoder.OnHeaderDecodedListener { decoder, _, _ ->
+                        decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+                    })
+            }
+        }
+    }
+
+    @SuppressLint("NewApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -44,7 +69,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         // when the user clicks the button and selects an image, trigger the OCR
-        val pickImage = registerForActivityResult(PickImageResultContract()) { runOCR(it) }
+        val pickImage = registerForActivityResult(PickImageResultContract()) { uri ->
+            uri?.run {
+                val bitmap = getBitmapFromURI(this)
+                runOCR(bitmap)
+            }
+        }
         binding.button.setOnClickListener { pickImage.launch(0) }
 
         // automatically trigger OCR (for testing purposes)

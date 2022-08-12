@@ -9,10 +9,11 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import android.util.Log
 import androidx.activity.result.contract.ActivityResultContract
 
 
-class PickImageResultContract : ActivityResultContract<Any, Bitmap?>() {
+class PickImageResultContract : ActivityResultContract<Any, Uri?>() {
     lateinit var contentResolver: ContentResolver
 
     override fun createIntent(context: Context, irrelevantInput: Any): Intent {
@@ -22,31 +23,12 @@ class PickImageResultContract : ActivityResultContract<Any, Bitmap?>() {
         return intent
     }
 
-    override fun parseResult(resultCode: Int, result: Intent?) : Bitmap? {
+    override fun parseResult(resultCode: Int, result: Intent?) : Uri? {
         if (resultCode != Activity.RESULT_OK) {
             return null
         }
 
         val uri = result?.data
-        val bitmap = uri?.run { getBitmapFromURI(this) }
-        return bitmap
-    }
-
-    @Suppress("DEPRECATION")
-    private fun getBitmapFromURI(uri: Uri): Bitmap {
-        return when {
-            Build.VERSION.SDK_INT < 28 -> MediaStore.Images.Media.getBitmap(
-                this.contentResolver,
-                uri
-            )
-            else -> {
-                val source = ImageDecoder.createSource(this.contentResolver, uri)
-                ImageDecoder.decodeBitmap(
-                    source,
-                    ImageDecoder.OnHeaderDecodedListener { decoder, _, _ ->
-                        decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
-                    })
-            }
-        }
+        return uri
     }
 }
