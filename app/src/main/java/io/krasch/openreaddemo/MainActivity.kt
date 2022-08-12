@@ -19,6 +19,9 @@ import io.krasch.openreaddemo.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private val context = this
+
+    private lateinit var ocr: OCR
     private val viewModel: OpenreadViewModel by viewModels()
     private lateinit var currentImage: Bitmap
 
@@ -46,11 +49,7 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        // load models to enable viewModel to do its job
-        val ocr = OCR(context = this)
-        viewModel.setOCR(ocr)
-
+        
         // whenever the view model has some new ocr results, update the UI
         viewModel.results.observe(this, Observer { ocrResults ->
             ocrResults.let {
@@ -64,6 +63,14 @@ class MainActivity : AppCompatActivity() {
             bitmap?.run {
                 currentImage = bitmap
                 binding.imageView.setImageBitmap(bitmap)
+
+                // todo this should be nicer
+                // do not want to load models right at the beginning because then app slow
+                if (!::ocr.isInitialized){
+                    ocr = OCR(context)
+                    viewModel.setOCR(ocr)
+                }
+
                 viewModel.triggerOCR(bitmap)
             }
         }
