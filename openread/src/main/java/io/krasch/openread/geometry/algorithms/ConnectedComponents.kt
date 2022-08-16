@@ -23,7 +23,6 @@ private fun getNeighbours(row: Int, col: Int): List<Pair<Int, Int>> {
     )
 }
 
-// todo should only text one array of threshold
 fun findConnectedComponents(data: Array2D<Boolean>) = sequence<Component> {
 
     // init 2D boolean array for storing which pixel has been visited  / not visited

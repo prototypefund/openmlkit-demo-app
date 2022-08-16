@@ -44,6 +44,10 @@ dependencies {
     implementation "androidx.fragment:fragment-ktx:1.5.1"
     // support for lifedata
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.5.1"
+    // support for launching
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
+
     implementation project(path: ':openread')    // use when developing library
     //implementation 'io.krasch:openread:0.0.5'  // use when working on app
 

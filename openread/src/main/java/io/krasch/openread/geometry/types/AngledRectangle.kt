@@ -55,7 +55,7 @@ data class AngledRectangle(
 }
 
 fun expandRect(rect: AngledRectangle, ratio: Double): AngledRectangle {
-    val diffWidth = rect.width * ratio
+    val diffWidth = rect.width * 0.1
     val diffHeight = rect.height * ratio
 
     val shiftBottomLeft = Point(-diffWidth / 2.0, + diffHeight / 2.0)

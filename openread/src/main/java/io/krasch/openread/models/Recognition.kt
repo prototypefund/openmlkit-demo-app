@@ -2,6 +2,9 @@ package io.krasch.openread.models
 
 import android.graphics.Bitmap
 import io.krasch.openread.image.resize
+import io.krasch.openread.image.rotateAndCutout
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.tensorflow.lite.Interpreter
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -16,15 +19,20 @@ class RecognitionModel(modelFile: MappedByteBuffer, numThreads: Int = -1) {
     private val options = Interpreter.Options().setNumThreads(numThreads)
     val model = Interpreter(modelFile, options)
 
-    fun predict(bitmap: Bitmap): String {
-        val resized = resize(bitmap, 200, 31, true)
+    suspend fun run(bitmap: Bitmap, box: DetectionResult): String {
+        // val expandedRect = expandRect(box.rectangle, 0.2)
+        val cutoutImage = rotateAndCutout(bitmap, box.rectangle)
+
+        val resized = resize(cutoutImage, 200, 31, true)
 
         val input = bitmapToByteBuffer(resized)
         val output = allocateOutputBuffer()
 
         // Log.v("bla", "detection model run start")
         // measurePerformance("recognition")  {model.run(input.rewind(), output.rewind())}
-        model.run(input.rewind(), output.rewind())
+        withContext(Dispatchers.IO) {
+            model.run(input.rewind(), output.rewind())
+        }
         // Log.v("bla", "detection model run done")
 
         val indexes = (0 until 48).map { output.getInt(it * INT64_SIZE) }
