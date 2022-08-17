@@ -10,16 +10,12 @@ import android.provider.MediaStore
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.*
-import io.krasch.openread.OCR
 import io.krasch.openreaddemo.databinding.ActivityMainBinding
 
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private val context = this
-
-    private lateinit var ocr: OCR
     private val viewModel: OpenreadViewModel by viewModels()
 
     @Suppress("DEPRECATION")
@@ -48,7 +44,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         // whenever the view model has some new ocr results, update the UI
-        viewModel.recognitions.observe(this, Observer { (image, ocrResults) ->
+        viewModel.recognitionResults.observe(this, Observer { (image, ocrResults) ->
             ocrResults.let {
                 val annotatedImage = drawOCRResults(image, ocrResults)
                 binding.imageView.setImageBitmap(annotatedImage)
@@ -59,14 +55,6 @@ class MainActivity : AppCompatActivity() {
         fun runOCR(bitmap: Bitmap?){
             bitmap?.run {
                 binding.imageView.setImageBitmap(bitmap)
-
-                // todo this should be nicer
-                // do not want to load models right at the beginning because then app slow
-                if (!::ocr.isInitialized){
-                    ocr = OCR(context)
-                    viewModel.setOCR(ocr)
-                }
-
                 viewModel.triggerOCR(bitmap)
             }
         }

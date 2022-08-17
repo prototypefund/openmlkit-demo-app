@@ -47,6 +47,7 @@ dependencies {
     // support for launching
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
+    implementation 'org.tensorflow:tensorflow-lite-support:0.3.0'
 
     implementation project(path: ':openread')    // use when developing library
     //implementation 'io.krasch:openread:0.0.5'  // use when working on app

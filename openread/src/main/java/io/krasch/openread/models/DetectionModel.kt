@@ -3,7 +3,6 @@ package io.krasch.openread.models
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.util.Log
-import androidx.core.graphics.scale
 import io.krasch.openread.geometry.algorithms.calculateConvexHull
 import io.krasch.openread.geometry.algorithms.calculateMinAreaRectangle
 import io.krasch.openread.geometry.algorithms.findConnectedComponents
@@ -12,11 +11,9 @@ import io.krasch.openread.geometry.types.Array2D
 import io.krasch.openread.geometry.types.Point
 import io.krasch.openread.geometry.types.expandRect
 import io.krasch.openread.image.resize2
+import io.krasch.openread.tflite.ImageModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.tensorflow.lite.Interpreter
-import org.tensorflow.lite.gpu.CompatibilityList
-import org.tensorflow.lite.gpu.GpuDelegate
 import java.nio.MappedByteBuffer
 import kotlin.math.floor
 import kotlin.math.max
@@ -26,67 +23,28 @@ const val THRESHOLD_TEXT_SECOND_PASS = 0.8
 const val THRESHOLD_LINK = 0.2
 
 data class DetectionResult(
-    val segmentation: List<Point>,
-    val hull: List<Point>,
-    val rectangle: AngledRectangle
+    val heatmap: Bitmap,
+    val boxes: List<AngledRectangle>
 )
 
-val compatList = CompatibilityList()
+class DetectionModel(val model: ImageModel) {
 
-class DetectionModel(modelFile: MappedByteBuffer) {
-
-    val options = Interpreter.Options().apply {
-        if (compatList.isDelegateSupportedOnThisDevice) {
-            // if the device has a supported GPU, add the GPU delegate
-            val delegateOptions = compatList.bestOptionsForThisDevice
-            this.addDelegate(GpuDelegate(delegateOptions))
-        } else {
-            // if the GPU is not supported, run on 4 threads
-            this.numThreads = 4
-        }
-    }
-
-    val model = Interpreter(modelFile, options)
-
-    suspend fun run(bitmap: Bitmap): List<DetectionResult> {
+    suspend fun run(bitmap: Bitmap): DetectionResult {
         // preprocessing
-        val (_, inputHeight, inputWidth, _) = model.getInputTensor(0).shape()
-        val (resizeRatio, resizedBitmap) = resize2(bitmap, inputWidth, inputHeight)
+        val (resizeRatio, resizedBitmap) = resize2(bitmap, model.imageWidth, model.imageHeight)
 
         // model prediction
-        val (charHeatmap, linkHeatmap) = predict(resizedBitmap)
+        Log.v("bla", "detection model run start")
+        val (charHeatmap, linkHeatmap) = model.predict(resizedBitmap)
+        Log.v("bla", "detection model run done")
 
-        val heatmapImage = makeColourHeatmap(charHeatmap, linkHeatmap, 1 / resizeRatio)
+        // val heatmapImage = makeColourHeatmap(charHeatmap, linkHeatmap, 1 / resizeRatio)
+        // Log.v("bla", "heatmap done")
 
         // find connected components and calculate boxes around them
         val boxes = postprocess(charHeatmap, linkHeatmap, 1 / resizeRatio)
-        return boxes.toList()
-    }
 
-    private suspend fun predict(bitmap: Bitmap): Pair<Array<Float>, Array<Float>> {
-        // prepare input buffer
-        val inputBuffer = allocateByteBuffer(model.getInputTensor(0))
-        bitmapToByteBuffer(bitmap, inputBuffer)
-
-        // prepare output buffers
-        val charHeatmapBuffer = allocateByteBuffer(model.getOutputTensor(0))
-        val linkHeatmapBuffer = allocateByteBuffer(model.getOutputTensor(1))
-
-        // run model
-        withContext(Dispatchers.IO) {
-            Log.v("bla", "detection model run start")
-            model.runForMultipleInputsOutputs(
-                arrayOf(inputBuffer),
-                mapOf(1 to charHeatmapBuffer, 0 to linkHeatmapBuffer)
-            )
-            Log.v("bla", "detection model run done")
-        }
-
-        // parse output buffers
-        val charHeatmap = byteBufferToFloatArray(charHeatmapBuffer)
-        val linkHeatmap = byteBufferToFloatArray(linkHeatmapBuffer)
-
-        return Pair(charHeatmap, linkHeatmap)
+        return DetectionResult(bitmap, boxes.toList())
     }
 
     private fun postprocess(
@@ -95,18 +53,16 @@ class DetectionModel(modelFile: MappedByteBuffer) {
         resizeRatio: Double
     ) = sequence {
 
-        val (_, heatmapHeight, heatmapWidth, _) = model.getOutputTensor(0).shape()
-
         // boolean array where True = this pixel is likely part of a piece of text
         val isText = charHeatmap.zip(linkHeatmap).map { (charScore, linkScore) ->
             (charScore >= THRESHOLD_TEXT_FIRST_PASS) || (linkScore >= THRESHOLD_LINK)
         }
 
         // to find connected components we need a 2D representation of the array
-        val isText2D = Array2D(isText.toTypedArray(), heatmapHeight, heatmapWidth)
+        val isText2D = Array2D(isText.toTypedArray(), model.imageHeight, model.imageWidth)
 
         // also need the char heatmap as a 2D array to do the second thresholding step
-        val charHeatmap2D = Array2D(charHeatmap, heatmapHeight, heatmapWidth)
+        val charHeatmap2D = Array2D(charHeatmap, model.imageHeight, model.imageWidth)
 
         // since components is a sequence, everything from here on is lazily executed
         val components = findConnectedComponents(isText2D)
@@ -136,11 +92,10 @@ class DetectionModel(modelFile: MappedByteBuffer) {
             // rectangle around the convex hull
             val rect = calculateMinAreaRectangle(hull)
 
-            // todo why can this be null?
-            if (rect != null) {
+            if (rect != null) { // todo why can this be null?
                 val expandedRect = expandRect(rect, 0.5)
                 if (expandedRect.width > expandedRect.height) {
-                    yield(DetectionResult(scaledPoints, hull, expandedRect))
+                    yield(expandedRect)
                 }
             }
         }
@@ -151,7 +106,6 @@ class DetectionModel(modelFile: MappedByteBuffer) {
         linkHeatmap: Array<Float>,
         resizeRatio: Double
     ): Bitmap {
-        val (_, height, width, _) = model.getOutputTensor(0).shape()
 
         val colourMap = listOf(
             Color.rgb(0, 0, 127),
@@ -175,12 +129,28 @@ class DetectionModel(modelFile: MappedByteBuffer) {
             colourMap[colourId]
         }
 
-        val heatmapImage = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        heatmapImage.setPixels(pixels.toIntArray(), 0, width, 0, 0, width, height)
-
-        return heatmapImage.scale(
-            (width * resizeRatio).toInt(),
-            (height * resizeRatio).toInt()
+        val heatmapImage = Bitmap.createBitmap(model.imageWidth, model.imageHeight, Bitmap.Config.ARGB_8888)
+        heatmapImage.setPixels(
+            pixels.toIntArray(),
+            0, model.imageWidth, 0, 0, model.imageWidth, model.imageHeight
         )
+
+        /* todo
+        return heatmapImage.scale(
+            (model.imageWidth * resizeRatio).toInt(),
+            (model.imageHeight * resizeRatio).toInt()
+        )*/
+        return heatmapImage
+    }
+
+    companion object {
+        suspend fun initialize(modelFile: MappedByteBuffer): DetectionModel {
+
+            val model = withContext(Dispatchers.IO) {
+                ImageModel(modelFile, hasGPUSupport = true)
+            }
+
+            return DetectionModel(model)
+        }
     }
 }

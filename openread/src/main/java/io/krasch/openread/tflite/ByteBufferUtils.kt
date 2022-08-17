@@ -1,4 +1,4 @@
-package io.krasch.openread.models
+package io.krasch.openread.tflite
 
 import android.graphics.Bitmap
 import org.tensorflow.lite.DataType
@@ -24,7 +24,7 @@ fun allocateByteBuffer(tensor: Tensor): ByteBuffer {
     return buffer
 }
 
-fun bitmapToByteBuffer(bitmap: Bitmap, buffer: ByteBuffer) {
+fun bitmapToByteBuffer(bitmap: Bitmap, buffer: ByteBuffer, convertToGreyscale: Boolean = false) {
     // get a flat array of pixels
     val pixels = IntArray(bitmap.width * bitmap.height)
     bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
@@ -37,9 +37,14 @@ fun bitmapToByteBuffer(bitmap: Bitmap, buffer: ByteBuffer) {
         val green = (it shr 8 and 0xFF).toFloat()
         val blue = (it and 0xFF).toFloat()
 
-        buffer.putFloat(red)
-        buffer.putFloat(green)
-        buffer.putFloat(blue)
+        if (convertToGreyscale) {
+            val grey = (red * 0.299f + green * 0.587f + blue * 0.114f) / 225f
+            buffer.putFloat(grey)
+        } else {
+            buffer.putFloat(red)
+            buffer.putFloat(green)
+            buffer.putFloat(blue)
+        }
     }
 }
 
@@ -51,4 +56,23 @@ fun byteBufferToFloatArray(buffer: ByteBuffer): Array<Float> {
         result.add(buffer.float)
 
     return result.toTypedArray()
+}
+
+fun byteBufferToInt64Array(buffer: ByteBuffer): Array<Float> {
+    val result = mutableListOf<Float>()
+
+    buffer.rewind()
+    while (buffer.hasRemaining())
+        result.add(buffer.long.toFloat()) // INT64 takes 8 bytes, same as long
+
+    return result.toTypedArray()
+}
+
+fun byteBufferToArray(buffer: ByteBuffer, tensorType: DataType): Array<Float> {
+    return if (tensorType == DataType.FLOAT32)
+        byteBufferToFloatArray(buffer)
+    else if (tensorType == DataType.INT64)
+        byteBufferToInt64Array(buffer)
+    else
+        throw NotImplementedError("Unsupported tensor type ${tensorType.name}")
 }
