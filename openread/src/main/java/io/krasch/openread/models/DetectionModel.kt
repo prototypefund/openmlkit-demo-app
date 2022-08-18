@@ -1,7 +1,6 @@
 package io.krasch.openread.models
 
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.util.Log
 import io.krasch.openread.geometry.algorithms.calculateConvexHull
 import io.krasch.openread.geometry.algorithms.calculateMinAreaRectangle
@@ -10,12 +9,14 @@ import io.krasch.openread.geometry.types.AngledRectangle
 import io.krasch.openread.geometry.types.Array2D
 import io.krasch.openread.geometry.types.Point
 import io.krasch.openread.geometry.types.expandRect
-import io.krasch.openread.image.resizeRatio
+import io.krasch.openread.image.ResizeConfig
+import io.krasch.openread.image.makeColourHeatmap
+import io.krasch.openread.image.resizeWithPadding
+import io.krasch.openread.image.undoResizeWithPadding
 import io.krasch.openread.tflite.ImageModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.nio.MappedByteBuffer
-import kotlin.math.floor
 import kotlin.math.max
 
 const val THRESHOLD_TEXT_FIRST_PASS = 0.2
@@ -31,20 +32,20 @@ class DetectionModel(val model: ImageModel) {
 
     suspend fun run(bitmap: Bitmap): DetectionResult {
         // preprocessing
-        val (resizedBitmap, resizeParams) = resizeRatio(bitmap, model.imageWidth, model.imageHeight)
+        val (resizedBitmap, resizeParams) = resizeWithPadding(bitmap, model.inputWidth, model.inputHeight)
 
         // model prediction
         Log.v("bla", "detection model run start")
         val (charHeatmap, linkHeatmap) = model.predict(resizedBitmap)
         Log.v("bla", "detection model run done")
 
-        // val heatmapImage = makeColourHeatmap(charHeatmap, linkHeatmap, 1 / resizeRatio)
-        // Log.v("bla", "heatmap done")
+        // nice colour representation of the heatmaps, good for debugging
+        val heatmapImage = prepareColourHeatmap(charHeatmap, linkHeatmap, resizeParams)
 
         // find connected components and calculate boxes around them
         val boxes = postprocess(charHeatmap, linkHeatmap, 1 / resizeParams.ratio)
 
-        return DetectionResult(bitmap, boxes.toList())
+        return DetectionResult(heatmapImage, boxes.toList())
     }
 
     private fun postprocess(
@@ -59,10 +60,10 @@ class DetectionModel(val model: ImageModel) {
         }
 
         // to find connected components we need a 2D representation of the array
-        val isText2D = Array2D(isText.toTypedArray(), model.imageHeight, model.imageWidth)
+        val isText2D = Array2D(isText.toTypedArray(), model.inputHeight, model.inputWidth)
 
         // also need the char heatmap as a 2D array to do the second thresholding step
-        val charHeatmap2D = Array2D(charHeatmap, model.imageHeight, model.imageWidth)
+        val charHeatmap2D = Array2D(charHeatmap, model.inputHeight, model.inputWidth)
 
         // since components is a sequence, everything from here on is lazily executed
         val components = findConnectedComponents(isText2D)
@@ -101,46 +102,15 @@ class DetectionModel(val model: ImageModel) {
         }
     }
 
-    private fun makeColourHeatmap(
+    private fun prepareColourHeatmap(
         charHeatmap: Array<Float>,
         linkHeatmap: Array<Float>,
-        resizeRatio: Double
+        resizeConfig: ResizeConfig,
     ): Bitmap {
 
-        val colourMap = listOf(
-            Color.rgb(0, 0, 127),
-            Color.rgb(0, 0, 241),
-            Color.rgb(0, 76, 255),
-            Color.rgb(0, 176, 255),
-            Color.rgb(41, 255, 205),
-            Color.rgb(124, 255, 121),
-            Color.rgb(205, 255, 41),
-            Color.rgb(255, 196, 0),
-            Color.rgb(255, 103, 0),
-            Color.rgb(241, 7, 0),
-        )
-
-        val combined = charHeatmap.zip(linkHeatmap).map { (char, link) ->
-            max(char, link)
-        }
-
-        val pixels = combined.map {
-            val colourId = floor(it * colourMap.size).toInt()
-            colourMap[colourId]
-        }
-
-        val heatmapImage = Bitmap.createBitmap(model.imageWidth, model.imageHeight, Bitmap.Config.ARGB_8888)
-        heatmapImage.setPixels(
-            pixels.toIntArray(),
-            0, model.imageWidth, 0, 0, model.imageWidth, model.imageHeight
-        )
-
-        /* todo
-        return heatmapImage.scale(
-            (model.imageWidth * resizeRatio).toInt(),
-            (model.imageHeight * resizeRatio).toInt()
-        )*/
-        return heatmapImage
+        val combined = charHeatmap.zip(linkHeatmap).map { (char, link) -> max(char, link) }
+        val colourHeatmap = makeColourHeatmap(combined, model.inputWidth, model.inputHeight)
+        return undoResizeWithPadding(colourHeatmap, resizeConfig)
     }
 
     companion object {

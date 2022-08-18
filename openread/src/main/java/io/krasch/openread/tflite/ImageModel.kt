@@ -29,8 +29,8 @@ open class ImageModel(modelFile: MappedByteBuffer, hasGPUSupport: Boolean = fals
     val model = Interpreter(modelFile, options)
 
     // these values are important for the caller to prepare the input image
-    val imageHeight: Int
-    val imageWidth: Int
+    val inputHeight: Int
+    val inputWidth: Int
 
     // this value is only needed internally, caller will always send us an RGB image
     // it will be this classes responsibility to convert to greyscale if necessary
@@ -56,8 +56,8 @@ open class ImageModel(modelFile: MappedByteBuffer, hasGPUSupport: Boolean = fals
         require((numChannels == 3) or (numChannels == 1))
 
         imageIsGreyscale = numChannels == 1
-        imageHeight = height
-        imageWidth = width
+        inputHeight = height
+        inputWidth = width
     }
 
     suspend fun predict(bitmap: Bitmap): List<Array<Float>> {

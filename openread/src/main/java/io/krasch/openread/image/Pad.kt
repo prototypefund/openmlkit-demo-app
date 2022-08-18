@@ -21,3 +21,10 @@ fun pad(image: Bitmap, left: Int = 0, top: Int = 0, right: Int = 0, bottom: Int 
 
     return paddedImage
 }
+
+fun unpad(image: Bitmap, left: Int = 0, top: Int = 0, right: Int = 0, bottom: Int = 0): Bitmap {
+    val originalWidth = image.width - left - right
+    val originalHeight = image.height - top - bottom
+
+    return Bitmap.createBitmap(image, left, top, originalWidth, originalHeight)
+}
