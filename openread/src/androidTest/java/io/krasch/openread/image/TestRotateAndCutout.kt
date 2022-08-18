@@ -7,6 +7,7 @@ import io.krasch.openread.createBitmap
 import io.krasch.openread.geometry.types.Angle
 import io.krasch.openread.geometry.types.AngledRectangle
 import io.krasch.openread.geometry.types.Point
+import io.krasch.openread.geometry.types.expandRect
 import io.krasch.openread.readBitmap
 import org.junit.Test
 import org.junit.runner.RunWith

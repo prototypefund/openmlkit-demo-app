@@ -1,7 +1,7 @@
 package io.krasch.openread.models
 
 import android.graphics.Bitmap
-import io.krasch.openread.image.resize
+import io.krasch.openread.image.resizeRatio
 import io.krasch.openread.tflite.ImageModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -13,7 +13,7 @@ class RecognitionModel(val model: ImageModel) {
 
     suspend fun run(bitmap: Bitmap): String {
         // preprocessing
-        val resized = resize(bitmap, 200, 31, true)
+        val (resized, _) = resizeRatio(bitmap, 200, 31)
 
         // run model
         val charIndices = model.predict(resized)[0]

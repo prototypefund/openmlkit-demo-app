@@ -10,7 +10,7 @@ import io.krasch.openread.geometry.types.AngledRectangle
 import io.krasch.openread.geometry.types.Array2D
 import io.krasch.openread.geometry.types.Point
 import io.krasch.openread.geometry.types.expandRect
-import io.krasch.openread.image.resize2
+import io.krasch.openread.image.resizeRatio
 import io.krasch.openread.tflite.ImageModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -31,7 +31,7 @@ class DetectionModel(val model: ImageModel) {
 
     suspend fun run(bitmap: Bitmap): DetectionResult {
         // preprocessing
-        val (resizeRatio, resizedBitmap) = resize2(bitmap, model.imageWidth, model.imageHeight)
+        val (resizedBitmap, resizeParams) = resizeRatio(bitmap, model.imageWidth, model.imageHeight)
 
         // model prediction
         Log.v("bla", "detection model run start")
@@ -42,7 +42,7 @@ class DetectionModel(val model: ImageModel) {
         // Log.v("bla", "heatmap done")
 
         // find connected components and calculate boxes around them
-        val boxes = postprocess(charHeatmap, linkHeatmap, 1 / resizeRatio)
+        val boxes = postprocess(charHeatmap, linkHeatmap, 1 / resizeParams.ratio)
 
         return DetectionResult(bitmap, boxes.toList())
     }
