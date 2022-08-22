@@ -46,7 +46,7 @@ class OpenreadViewModel(application: Application) : AndroidViewModel(application
     }
 
 
-    private val currentImage = MutableLiveData<Bitmap>()
+    val currentImage = MutableLiveData<Bitmap>()
 
     fun triggerOCR(bitmap: Bitmap) {
         // have already started the work on this image, no need to do it again
