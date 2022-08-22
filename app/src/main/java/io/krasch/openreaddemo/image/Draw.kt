@@ -1,16 +1,15 @@
 package io.krasch.openreaddemo.image
 
-import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.DashPathEffect
 import android.graphics.Paint
 import io.krasch.openread.geometry.types.AngledRectangle
 import io.krasch.openread.geometry.types.Point
-import io.krasch.openreaddemo.OCRResult
+import io.krasch.openreaddemo.TextRecognitionResult
 
 
-fun drawOCRResults(canvas: Canvas, result: List<OCRResult>) {
+fun drawOCRResults(canvas: Canvas, result: List<TextRecognitionResult>) {
     for (r in result) {
         if (r.text != null) {
             drawBoundingBox(canvas, r.box)

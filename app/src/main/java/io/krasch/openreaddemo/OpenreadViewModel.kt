@@ -2,7 +2,6 @@ package io.krasch.openreaddemo
 
 import android.app.Application
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.lifecycle.*
 import io.krasch.openread.geometry.types.AngledRectangle
 import io.krasch.openread.image.rotateAndCutout
@@ -15,9 +14,19 @@ const val DETECTION_MODEL_PATH = "craft-mini-126__epoch70_w720xh960.tflite"
 const val RECOGNITION_MODEL_PATH = "lite-model_keras-ocr_float16_2.tflite"
 
 
-data class OCRResult(
+data class TextRecognitionResult(
     val box: AngledRectangle,
     val text: String?
+)
+
+enum class Status {
+    RUNNING,
+    DONE,
+}
+
+data class RecognitionProgress (
+    val total: Int,
+    val done: Int
 )
 
 
@@ -47,7 +56,10 @@ class OpenreadViewModel(application: Application) : AndroidViewModel(application
     }
 
 
-    val currentImage = MutableLiveData<Bitmap>()
+    private val currentImage = MutableLiveData<Bitmap>()
+    val detectionStatus = MutableLiveData<Status>()
+    val recognitionProgress = MutableLiveData<RecognitionProgress>()
+
 
     fun triggerOCR(bitmap: Bitmap) {
         // have already started the work on this image, no need to do it again
@@ -56,6 +68,7 @@ class OpenreadViewModel(application: Application) : AndroidViewModel(application
 
         // start the work on this image
         currentImage.value = bitmap
+        detectionStatus.value = Status.RUNNING
     }
 
     private val detectionResults = detectionModel.switchMap { model ->
@@ -68,25 +81,40 @@ class OpenreadViewModel(application: Application) : AndroidViewModel(application
 
     private val recognitionResults = recognitionModel.switchMap { model ->
         detectionResults.switchMap { (image, detections) ->
+
+            if (image.sameAs(currentImage.value)) {
+                detectionStatus.value = Status.DONE
+            }
+
             liveData {
                 val (heatmap, boxes) = detections
 
                 val words = mutableListOf<String>()
-                emit(Pair(image, boxes.zipWithDefault(words, null).map { OCRResult(it.first, it.second) }))
+                if (image.sameAs(currentImage.value)){
+                    emit(Pair(image, boxes.zipWithDefault(words, null).map { TextRecognitionResult(it.first, it.second) }))
+                    recognitionProgress.value = RecognitionProgress(detections.boxes.size, 0)
+                }
 
-                for (box in boxes) {
+                for (i in boxes.indices) {
+                    val box = boxes[i]
+
                     if (!image.sameAs(currentImage.value))
                         break
 
                     val cutout = rotateAndCutout(image, box)
                     words.add(model.run(cutout))
 
-                    emit(Pair(image, boxes.zipWithDefault(words, null).map { OCRResult(it.first, it.second) })
-                    )
+                    if (!image.sameAs(currentImage.value))
+                        break
+
+                    recognitionProgress.value = RecognitionProgress(detections.boxes.size, i+1)
+                    emit(Pair(image, boxes.zipWithDefault(words, null).map { TextRecognitionResult(it.first, it.second) }))
                 }
             }
         }
     }
+
+    val image: LiveData<Bitmap> = currentImage
 
     val heatmap = detectionResults.switchMap { (image, detections) ->
         liveData {
@@ -101,6 +129,15 @@ class OpenreadViewModel(application: Application) : AndroidViewModel(application
                 emit(recognitions)
         }
     }
+
+    val modelLoadingStatus = detectionModel.switchMap { _ ->
+        recognitionModel.switchMap { _ ->
+            liveData {
+                emit(Status.DONE)
+            }
+        }
+    }
+
 
     private fun loadModelFile(path: String): MappedByteBuffer {
         val context = getApplication<Application>().applicationContext
