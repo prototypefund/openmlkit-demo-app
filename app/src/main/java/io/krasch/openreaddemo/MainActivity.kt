@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity() {
             binding.viewPager.setCurrentItem(adapter.getTabPosition("results"), false)
         }
 
-        viewModel.recognitionResults.observe(this, Observer{(image, results) ->
+        viewModel.results.observe(this, Observer { results ->
             adapter.getCanvas("results")?.run {
                 drawOCRResults(this, results)
                 adapter.redrawTab("results")
@@ -64,8 +64,8 @@ class MainActivity : AppCompatActivity() {
             adapter.setImage("results", image)
         })
 
-        viewModel.detectionResults.observe(this, Observer { (_, results) ->
-            adapter.setImage("heatmap", results.heatmap)
+        viewModel.heatmap.observe(this, Observer { heatmap ->
+            adapter.setImage("heatmap", heatmap)
         })
 
         // when the user clicks the button and selects an image, trigger the OCR

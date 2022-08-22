@@ -2,6 +2,7 @@ package io.krasch.openreaddemo
 
 import android.app.Application
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.lifecycle.*
 import io.krasch.openread.geometry.types.AngledRectangle
 import io.krasch.openread.image.rotateAndCutout
@@ -57,7 +58,7 @@ class OpenreadViewModel(application: Application) : AndroidViewModel(application
         currentImage.value = bitmap
     }
 
-    val detectionResults = detectionModel.switchMap { model ->
+    private val detectionResults = detectionModel.switchMap { model ->
         currentImage.switchMap { image ->
             liveData {
                 emit(Pair(image, model.run(image)))
@@ -65,21 +66,39 @@ class OpenreadViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    val recognitionResults = recognitionModel.switchMap { model ->
+    private val recognitionResults = recognitionModel.switchMap { model ->
         detectionResults.switchMap { (image, detections) ->
             liveData {
                 val (heatmap, boxes) = detections
 
                 val words = mutableListOf<String>()
-                emit(Pair(image, boxes.zipWithDefault(words, null).map {OCRResult(it.first, it.second)}))
+                emit(Pair(image, boxes.zipWithDefault(words, null).map { OCRResult(it.first, it.second) }))
 
-                for (box in boxes){
+                for (box in boxes) {
+                    if (!image.sameAs(currentImage.value))
+                        break
+
                     val cutout = rotateAndCutout(image, box)
                     words.add(model.run(cutout))
 
-                    emit(Pair(image, boxes.zipWithDefault(words, null).map {OCRResult(it.first, it.second)}))
+                    emit(Pair(image, boxes.zipWithDefault(words, null).map { OCRResult(it.first, it.second) })
+                    )
                 }
             }
+        }
+    }
+
+    val heatmap = detectionResults.switchMap { (image, detections) ->
+        liveData {
+            if (image.sameAs(currentImage.value))
+                emit(detections.heatmap)
+        }
+    }
+
+    val results = recognitionResults.switchMap { (image, recognitions) ->
+        liveData {
+            if (image.sameAs(currentImage.value))
+                emit(recognitions)
         }
     }
 
