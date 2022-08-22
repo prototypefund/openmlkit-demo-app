@@ -10,24 +10,19 @@ import io.krasch.openread.geometry.types.Point
 import io.krasch.openreaddemo.OCRResult
 
 
-fun drawOCRResults(bitmap: Bitmap, result: List<OCRResult>): Bitmap {
-    val mutable = bitmap.copy(Bitmap.Config.ARGB_8888, true)
-    val canvas = Canvas(mutable)
-
-    for (r in result){
-        if (r.text != null){
+fun drawOCRResults(canvas: Canvas, result: List<OCRResult>) {
+    for (r in result) {
+        if (r.text != null) {
             drawBoundingBox(canvas, r.box)
             drawText(canvas, r.box, r.text)
-        }
-        else {
-            drawBoundingBox(canvas, r.box, dotted=true)
+        } else {
+            drawBoundingBox(canvas, r.box, dotted = true)
         }
     }
-
-    return mutable
 }
 
-fun drawLine(canvas: Canvas, start: Point, end: Point, paint: Paint) {
+
+private fun drawLine(canvas: Canvas, start: Point, end: Point, paint: Paint) {
     canvas.drawLine(
         start.x.toFloat(),
         start.y.toFloat(),
@@ -37,7 +32,7 @@ fun drawLine(canvas: Canvas, start: Point, end: Point, paint: Paint) {
     )
 }
 
-fun drawBoundingBox(canvas: Canvas, box: AngledRectangle, dotted: Boolean = false) {
+private fun drawBoundingBox(canvas: Canvas, box: AngledRectangle, dotted: Boolean = false) {
     val paint = Paint().apply {
         color = Color.GREEN
         style = Paint.Style.STROKE
@@ -53,7 +48,7 @@ fun drawBoundingBox(canvas: Canvas, box: AngledRectangle, dotted: Boolean = fals
     drawLine(canvas, box.topLeft, box.bottomLeft, paint)
 }
 
-fun drawText(canvas: Canvas, box: AngledRectangle, text: String){
+private fun drawText(canvas: Canvas, box: AngledRectangle, text: String) {
     val textPaint = Paint().apply {
         color = Color.parseColor("#263d8c")
         textSize = 128f

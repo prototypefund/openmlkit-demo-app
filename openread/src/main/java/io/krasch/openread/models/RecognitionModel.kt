@@ -12,6 +12,7 @@ const val ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz"
 class RecognitionModel(val model: ImageModel) {
 
     suspend fun run(bitmap: Bitmap): String {
+
         // preprocessing
         val (resized, _) = resizeWithPadding(bitmap, 200, 31)
 

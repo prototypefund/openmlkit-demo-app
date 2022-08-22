@@ -1,7 +1,6 @@
 package io.krasch.openreaddemo
 
 import android.annotation.SuppressLint
-import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -11,7 +10,9 @@ import io.krasch.openreaddemo.databinding.ActivityMainBinding
 import io.krasch.openreaddemo.image.PickImageResultContract
 import io.krasch.openreaddemo.image.drawOCRResults
 import io.krasch.openreaddemo.image.getBitmapFromURI
+import io.krasch.openreaddemo.tabs.DrawableImageTab
 import io.krasch.openreaddemo.tabs.ImageTabAdapter
+import io.krasch.openreaddemo.tabs.disableAnimations
 
 
 class MainActivity : AppCompatActivity() {
@@ -27,50 +28,55 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // have 3 image tabs, todo only the "results" one actually needs to be drawable
+        val tabs = listOf(
+            DrawableImageTab("original"),
+            DrawableImageTab("results"),
+            DrawableImageTab("heatmap")
+        )
+
         // initialise tabs
-        val adapter = ImageTabAdapter(listOf("original", "results", "heatmap"))
+        val adapter = ImageTabAdapter(tabs)
         binding.viewPager.adapter = adapter
+
+        // configure view pager
+        disableAnimations(binding.viewPager)
 
         // wire tabs to view pager
         TabLayoutMediator(binding.imageTabs, binding.viewPager) { tab, position ->
-            tab.text = adapter.getTabName(position)
+            tab.text = adapter.getTabTitle(position)
         }.attach()
 
-
-        // whenever the view model has some new ocr results, update the UI
-        val annotatedImage = viewModel.recognitionResults.map { (image, ocrResults) ->
-            drawOCRResults(image, ocrResults)
-            //image
+        // pre-select the "results" tab
+        binding.viewPager.post {
+            binding.viewPager.setCurrentItem(adapter.getTabPosition("results"), false)
         }
 
-        annotatedImage.observe(this, Observer { image ->
-            adapter.setImage("results", image)
+        viewModel.recognitionResults.observe(this, Observer{(image, results) ->
+            adapter.getCanvas("results")?.run {
+                drawOCRResults(this, results)
+                adapter.redrawTab("results")
+            }
         })
 
         viewModel.currentImage.observe(this, Observer { image ->
             adapter.setImage("original", image)
+            adapter.setImage("results", image)
         })
 
         viewModel.detectionResults.observe(this, Observer { (_, results) ->
             adapter.setImage("heatmap", results.heatmap)
         })
 
-        // when OCR is starting: update UI and trigger the models
-        fun runOCR(bitmap: Bitmap?){
-            bitmap?.run {
-                //binding.imageView.setImageBitmap(bitmap)
-                viewModel.triggerOCR(bitmap)
-            }
-        }
-
         // when the user clicks the button and selects an image, trigger the OCR
         val pickImage = registerForActivityResult(PickImageResultContract()) { uri ->
             uri?.run {
                 val bitmap = getBitmapFromURI(contentResolver, this)
-                runOCR(bitmap)
+                viewModel.triggerOCR(bitmap)
             }
         }
         binding.pickImageButton.setOnClickListener { pickImage.launch(0) }
+
 
         // automatically trigger OCR (for testing purposes)
         //val bitmap = BitmapFactory.decodeStream(assets.open("seelowen.jpg"))
