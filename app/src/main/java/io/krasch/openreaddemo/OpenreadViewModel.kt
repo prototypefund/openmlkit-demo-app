@@ -71,13 +71,13 @@ class OpenreadViewModel(application: Application) : AndroidViewModel(application
                 val (heatmap, boxes) = detections
 
                 val words = mutableListOf<String>()
-                emit(Pair(heatmap, boxes.zipWithDefault(words, null).map {OCRResult(it.first, it.second)}))
+                emit(Pair(image, boxes.zipWithDefault(words, null).map {OCRResult(it.first, it.second)}))
 
                 for (box in boxes){
                     val cutout = rotateAndCutout(image, box)
                     words.add(model.run(cutout))
 
-                    emit(Pair(heatmap, boxes.zipWithDefault(words, null).map {OCRResult(it.first, it.second)}))
+                    emit(Pair(image, boxes.zipWithDefault(words, null).map {OCRResult(it.first, it.second)}))
                 }
             }
         }

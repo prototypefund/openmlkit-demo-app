@@ -1,15 +1,11 @@
-package io.krasch.openreaddemo
+package io.krasch.openreaddemo.image
 
 import android.app.Activity
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.ImageDecoder
 import android.net.Uri
-import android.os.Build
 import android.provider.MediaStore
-import android.util.Log
 import androidx.activity.result.contract.ActivityResultContract
 
 
@@ -23,12 +19,11 @@ class PickImageResultContract : ActivityResultContract<Any, Uri?>() {
         return intent
     }
 
-    override fun parseResult(resultCode: Int, result: Intent?) : Uri? {
+    override fun parseResult(resultCode: Int, result: Intent?): Uri? {
         if (resultCode != Activity.RESULT_OK) {
             return null
         }
 
-        val uri = result?.data
-        return uri
+        return result?.data
     }
 }

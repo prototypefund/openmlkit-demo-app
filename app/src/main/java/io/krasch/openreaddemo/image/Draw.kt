@@ -1,4 +1,4 @@
-package io.krasch.openreaddemo
+package io.krasch.openreaddemo.image
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -7,6 +7,7 @@ import android.graphics.DashPathEffect
 import android.graphics.Paint
 import io.krasch.openread.geometry.types.AngledRectangle
 import io.krasch.openread.geometry.types.Point
+import io.krasch.openreaddemo.OCRResult
 
 
 fun drawOCRResults(bitmap: Bitmap, result: List<OCRResult>): Bitmap {
