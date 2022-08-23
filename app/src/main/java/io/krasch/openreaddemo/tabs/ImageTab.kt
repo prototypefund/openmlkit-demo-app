@@ -3,30 +3,8 @@ package io.krasch.openreaddemo.tabs
 import android.graphics.Bitmap
 import android.graphics.Canvas
 
-class DrawableImageTab(val title: String){
-    private lateinit var image: Bitmap
-    private lateinit var canvas: Canvas
-
-    fun setImage(image: Bitmap) {
-        this.image = image.copy(Bitmap.Config.ARGB_8888, true)
-        this.canvas = Canvas(this.image)
-    }
-
-    fun getCanvas(): Canvas? {
-        return if (this::canvas.isInitialized) { // todo
-            this.canvas
-        } else {
-            null
-        }
-    }
-
-    fun getImage(): Bitmap? {
-        return if (this::image.isInitialized) { // todo
-            this.image
-        } else {
-            null
-        }
-    }
+class ImageTab(val title: String){
+    var image: Bitmap? = null
 
     override fun hashCode(): Int {
         return title.hashCode()
@@ -36,7 +14,7 @@ class DrawableImageTab(val title: String){
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as DrawableImageTab
+        other as ImageTab
 
         if (title != other.title) return false
 

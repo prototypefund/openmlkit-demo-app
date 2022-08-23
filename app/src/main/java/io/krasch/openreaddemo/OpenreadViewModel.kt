@@ -61,7 +61,7 @@ class OpenreadViewModel(application: Application) : AndroidViewModel(application
     val recognitionProgress = MutableLiveData<RecognitionProgress>()
 
 
-    fun triggerOCR(bitmap: Bitmap) {
+    fun triggerTextRecognition(bitmap: Bitmap) {
         // have already started the work on this image, no need to do it again
         if (bitmap.sameAs(currentImage.value))
             return
