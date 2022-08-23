@@ -54,9 +54,9 @@ data class AngledRectangle(
     }*/
 }
 
-fun expandRect(rect: AngledRectangle, ratio: Double): AngledRectangle {
-    val diffWidth = rect.width * 0.1
-    val diffHeight = rect.height * ratio
+fun expandRect(rect: AngledRectangle, ratioWidth: Double, ratioHeight: Double): AngledRectangle {
+    val diffWidth = rect.width * ratioWidth
+    val diffHeight = rect.height * ratioHeight
 
     val shiftBottomLeft = Point(-diffWidth / 2.0, + diffHeight / 2.0)
     val newBottomLeft = (rect.bottomLeft.rotate(-rect.angleBottom) + shiftBottomLeft).rotate(rect.angleBottom)

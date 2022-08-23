@@ -94,7 +94,7 @@ class DetectionModel(val model: ImageModel) {
             val rect = calculateMinAreaRectangle(hull)
 
             if (rect != null) { // todo why can this be null?
-                val expandedRect = expandRect(rect, 0.5)
+                val expandedRect = expandRect(rect, ratioWidth = 0.1, ratioHeight = 0.5)
                 if (expandedRect.width > expandedRect.height) {
                     yield(expandedRect)
                 }

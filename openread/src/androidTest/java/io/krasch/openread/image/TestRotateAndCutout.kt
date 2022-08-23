@@ -118,7 +118,7 @@ class TestRotateAndCutout {
         val bitmap = bitmapClockwise
         val rect = rectClockwise
 
-        val expandedRect = expandRect(rect, 0.1)
+        val expandedRect = expandRect(rect, 0.1, 0.1)
 
         val actual_ = rotateAndCutout(bitmap, expandedRect)
         // blue rectangle should be at this position
