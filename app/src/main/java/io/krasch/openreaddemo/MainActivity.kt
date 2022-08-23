@@ -73,10 +73,7 @@ class MainActivity : AppCompatActivity() {
 
         // when the user clicks the button and selects an image, trigger the OCR
         val pickImage = registerForActivityResult(PickImageResultContract()) { uri ->
-            uri?.run {
-                val bitmap = getBitmapFromURI(contentResolver, this)
-                viewModel.triggerTextRecognition(bitmap)
-            }
+            uri?.run { viewModel.triggerTextRecognition(this) }
         }
         binding.pickImageButton.setOnClickListener { pickImage.launch(0) }
     }

@@ -2,6 +2,8 @@ package io.krasch.openreaddemo
 
 import android.app.Application
 import android.graphics.Bitmap
+import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -12,6 +14,9 @@ import io.krasch.openread.image.rotateAndCutout
 import io.krasch.openread.models.DetectionModel
 import io.krasch.openread.models.RecognitionModel
 import io.krasch.openread.tflite.fileToByteBuffer
+import io.krasch.openreaddemo.image.getBitmapFromURI
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.nio.MappedByteBuffer
 
 const val DETECTION_MODEL_PATH = "craft-mini-126__epoch70_w720xh960.tflite"
@@ -49,7 +54,7 @@ class OpenreadViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    private val imageInternal = MutableLiveData<Bitmap>()
+    private val imageUriInternal = MutableLiveData<Uri>()
     private val statusInternal = MutableLiveData<String>()
 
     init {
@@ -57,13 +62,21 @@ class OpenreadViewModel(application: Application) : AndroidViewModel(application
     }
 
 
-    fun triggerTextRecognition(bitmap: Bitmap) {
-        // have already started the work on this image, no need to do it again
-        if (bitmap.sameAs(imageInternal.value))
+    fun triggerTextRecognition(uri: Uri) {
+        Log.v("bla", "$uri ${imageUriInternal.value}")
+
+        if (uri == imageUriInternal.value)
             return
 
         // start the work on this image
-        imageInternal.value = bitmap
+        imageUriInternal.value = uri
+    }
+
+    private val imageInternal = imageUriInternal.switchMap { uri ->
+        liveData {
+            val context = getApplication<Application>().applicationContext
+            emit(getBitmapFromURI(context.contentResolver, uri))
+        }
     }
 
     private val detectionResults = detectionModel.switchMap { model ->

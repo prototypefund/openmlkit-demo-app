@@ -6,21 +6,25 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Suppress("DEPRECATION")
-fun getBitmapFromURI(contentResolver: ContentResolver, uri: Uri): Bitmap {
+suspend fun getBitmapFromURI(contentResolver: ContentResolver, uri: Uri): Bitmap {
     return when {
-        Build.VERSION.SDK_INT < 28 -> MediaStore.Images.Media.getBitmap(
-            contentResolver,
-            uri
-        )
+        Build.VERSION.SDK_INT < 28 ->
+            withContext(Dispatchers.IO) {
+                MediaStore.Images.Media.getBitmap(contentResolver, uri)
+            }
         else -> {
             val source = ImageDecoder.createSource(contentResolver, uri)
-            ImageDecoder.decodeBitmap(
-                source,
-                ImageDecoder.OnHeaderDecodedListener { decoder, _, _ ->
-                    decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
-                })
+            withContext(Dispatchers.IO) {
+                ImageDecoder.decodeBitmap(
+                    source,
+                    ImageDecoder.OnHeaderDecodedListener { decoder, _, _ ->
+                        decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+                    })
+            }
         }
     }
 }
