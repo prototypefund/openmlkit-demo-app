@@ -66,7 +66,10 @@ class MainActivity : AppCompatActivity() {
         viewModel.image.observe(this, Observer { image ->
             adapter.setImage("original", image)
             adapter.setImage("results", image)
+
             binding.imageTabs.visibility = View.VISIBLE
+            binding.viewPager.setCurrentItem(adapter.getTabPosition("results"), false)
+
             binding.statusBar.text = " "
         })
 

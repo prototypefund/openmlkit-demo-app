@@ -73,7 +73,10 @@ class RecognitionResultsDrawer(val original: Bitmap){
             canvas.drawRoundRect(translatedBox, cornerRadius, cornerRadius, solidLinePaint)
 
             // write the text itself (observe that now undoing the above -box.height)
-            writeText(canvas, translatedBox.width(), -translatedBox.height(), text)
+            if (text.isNotEmpty())
+                writeText(canvas, translatedBox.width(), -translatedBox.height(), text)
+            else
+                writeText(canvas, translatedBox.width(), -translatedBox.height(), "?")
         }
 
         canvas.restore()
