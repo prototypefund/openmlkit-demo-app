@@ -16,6 +16,7 @@
         android:id="@+id/viewPager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/pickImageButton"
         app:layout_constraintTop_toTopOf="parent"/>
 
     <TextView
@@ -25,8 +26,6 @@
         android:gravity="end"
         android:paddingStart="10sp"
         android:paddingEnd="10sp"
-        android:paddingTop="10sp"
-        android:paddingBottom="10sp"
         app:layout_constraintBottom_toTopOf="@id/pickImageButton" />
 
 
