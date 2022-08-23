@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        
+
         // initialise tabs
         val adapter = ImageTabAdapter(listOf("original", "results", "heatmap"))
         binding.viewPager.adapter = adapter
@@ -62,26 +62,14 @@ class MainActivity : AppCompatActivity() {
 
             binding.imageTabs.visibility = View.VISIBLE
             binding.viewPager.setCurrentItem(adapter.getTabPosition("results"), false)
-
-            binding.statusBar.text = " "
         })
 
         viewModel.heatmap.observe(this, Observer { heatmap ->
             adapter.setImage("heatmap", heatmap)
         })
 
-        viewModel.detectionStatus.observe(this, Observer { status ->
-            if (status == Status.RUNNING)
-                binding.statusBar.text = "Finding text..."
-            else
-                binding.statusBar.text = " "
-        })
-
-        viewModel.recognitionProgress.observe(this, Observer { progress ->
-            if ((progress.done < progress.total) && (progress.total > 0))
-                binding.statusBar.text = "Reading text (${progress.done} / ${progress.total})"
-            else
-                binding.statusBar.text  = " "
+        viewModel.status.observe(this, Observer { status ->
+            binding.statusBar.text = status
         })
 
         // when the user clicks the button and selects an image, trigger the OCR
