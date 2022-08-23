@@ -29,14 +29,7 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        // have 3 image tabs
-        /*val tabs = listOf(
-            ImageTab("original"),
-            ImageTab("results"),
-            ImageTab("heatmap")
-        )*/
-
+        
         // initialise tabs
         val adapter = ImageTabAdapter(listOf("original", "results", "heatmap"))
         binding.viewPager.adapter = adapter
@@ -99,17 +92,5 @@ class MainActivity : AppCompatActivity() {
             }
         }
         binding.pickImageButton.setOnClickListener { pickImage.launch(0) }
-
-
-        // automatically trigger OCR (for testing purposes)
-        //val bitmap = BitmapFactory.decodeStream(assets.open("seelowen.jpg"))
-        //viewModel.triggerTextRecognition(bitmap)
-
-        /*val rect = AngledRectangle(bottomLeft = Point(1942, 754), width=494.0, height=253.0, angleBottom = Angle.fromDegree(-4.1))
-
-        val drawer = RecognitionResultsDrawer(bitmap)
-        drawer.drawResults(listOf(TextRecognitionResult(rect, "ens")))
-
-        adapter.setImage("results", drawer.image)*/
     }
 }
