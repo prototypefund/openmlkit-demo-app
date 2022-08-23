@@ -19,8 +19,8 @@ import kotlinx.coroutines.withContext
 import java.nio.MappedByteBuffer
 import kotlin.math.max
 
-const val THRESHOLD_TEXT_FIRST_PASS = 0.2
-const val THRESHOLD_TEXT_SECOND_PASS = 0.8
+const val THRESHOLD_TEXT_FIRST_PASS = 0.4
+const val THRESHOLD_TEXT_SECOND_PASS = 0.7
 const val THRESHOLD_LINK = 0.2
 
 data class DetectionResult(
@@ -73,9 +73,13 @@ class DetectionModel(val model: ImageModel) {
             if (component.size <= 10)
                 continue
 
-            // at least one pixel in the component should be above the second text threshold
-            val maxScore = component.map { (row, col) -> charHeatmap2D[row, col] }.maxOf { it }
-            if (maxScore < THRESHOLD_TEXT_SECOND_PASS)
+            // these pixels clear the second, higher, threshold, i.e. very likely to be text
+            val intensePixels = component.filter { (row, col) ->
+                charHeatmap2D[row, col] >= THRESHOLD_TEXT_SECOND_PASS
+            }
+
+            // only keep components that have some percentage of such intense pixel
+            if (intensePixels.size.toFloat() / component.size < 0.02)
                 continue
 
             // let's go from array coordinates to points in our actual image coordinate system
@@ -93,11 +97,13 @@ class DetectionModel(val model: ImageModel) {
             // rectangle around the convex hull
             val rect = calculateMinAreaRectangle(hull)
 
-            if (rect != null) { // todo why can this be null?
-                val expandedRect = expandRect(rect, ratioWidth = 0.1, ratioHeight = 0.5)
-                if (expandedRect.width > expandedRect.height) {
-                    yield(expandedRect)
-                }
+            // todo why can this be null?
+            if (rect == null)
+                continue
+
+            val expandedRect = expandRect(rect, ratioWidth = 0.1, ratioHeight = 0.5)
+            if (expandedRect.width > expandedRect.height) {
+                yield(expandedRect)
             }
         }
     }
