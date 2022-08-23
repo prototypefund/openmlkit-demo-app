@@ -12,7 +12,6 @@ import io.krasch.openreaddemo.databinding.ActivityMainBinding
 import io.krasch.openreaddemo.image.PickImageResultContract
 import io.krasch.openreaddemo.image.RecognitionResultsDrawer
 import io.krasch.openreaddemo.image.getBitmapFromURI
-import io.krasch.openreaddemo.tabs.ImageTab
 import io.krasch.openreaddemo.tabs.ImageTabAdapter
 import io.krasch.openreaddemo.tabs.disableAnimations
 
