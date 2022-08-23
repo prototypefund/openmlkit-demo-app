@@ -57,7 +57,6 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.4.2'
     implementation 'com.google.android.material:material:1.6.1'
     implementation 'org.tensorflow:tensorflow-lite:2.8.0'
-    implementation 'org.tensorflow:tensorflow-lite-support:0.3.0'
     implementation 'org.tensorflow:tensorflow-lite-select-tf-ops:2.8.0'
     implementation 'org.tensorflow:tensorflow-lite-gpu:2.8.0'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"

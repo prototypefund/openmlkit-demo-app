@@ -1,10 +1,14 @@
 package io.krasch.openread.tflite
 
+import android.content.res.AssetFileDescriptor
 import android.graphics.Bitmap
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Tensor
+import java.io.FileInputStream
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.nio.MappedByteBuffer
+import java.nio.channels.FileChannel
 
 private fun getTypeSizeInBytes(tensorType: DataType): Int {
     return when (tensorType.name) {
@@ -75,4 +79,18 @@ fun byteBufferToArray(buffer: ByteBuffer, tensorType: DataType): Array<Float> {
         byteBufferToInt64Array(buffer)
     else
         throw NotImplementedError("Unsupported tensor type ${tensorType.name}")
+}
+
+fun fileToByteBuffer(fileDescriptor: AssetFileDescriptor): MappedByteBuffer {
+    val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
+
+    val buffer = inputStream.channel.map(
+        FileChannel.MapMode.READ_ONLY,
+        fileDescriptor.startOffset,
+        fileDescriptor.declaredLength
+    )
+
+    inputStream.close()
+
+    return buffer
 }

@@ -1,14 +1,21 @@
 package io.krasch.openreaddemo
 
 import android.app.Application
+import android.content.res.AssetFileDescriptor
 import android.graphics.Bitmap
-import androidx.lifecycle.*
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.liveData
+import androidx.lifecycle.switchMap
 import io.krasch.openread.geometry.types.AngledRectangle
 import io.krasch.openread.image.rotateAndCutout
 import io.krasch.openread.models.DetectionModel
 import io.krasch.openread.models.RecognitionModel
-import org.tensorflow.lite.support.common.FileUtil
+import io.krasch.openread.tflite.fileToByteBuffer
+import java.io.FileInputStream
 import java.nio.MappedByteBuffer
+import java.nio.channels.FileChannel
 
 const val DETECTION_MODEL_PATH = "craft-mini-126__epoch70_w720xh960.tflite"
 const val RECOGNITION_MODEL_PATH = "lite-model_keras-ocr_float16_2.tflite"
@@ -141,6 +148,6 @@ class OpenreadViewModel(application: Application) : AndroidViewModel(application
 
     private fun loadModelFile(path: String): MappedByteBuffer {
         val context = getApplication<Application>().applicationContext
-        return FileUtil.loadMappedFile(context, path)
+        return fileToByteBuffer(context.assets.openFd(path))
     }
 }

@@ -42,11 +42,6 @@ publishing {
                 tensorflow.appendNode('artifactId', 'tensorflow-lite')
                 tensorflow.appendNode('version', '2.8.0')
 
-                def tensorflow_support = dependencies.appendNode('dependency')
-                tensorflow_support.appendNode('groupId', 'org.tensorflow')
-                tensorflow_support.appendNode('artifactId', 'tensorflow-lite-support')
-                tensorflow_support.appendNode('version', '0.3.0')
-
                 def tensorflow_ops = dependencies.appendNode('dependency')
                 tensorflow_ops.appendNode('groupId', 'org.tensorflow')
                 tensorflow_ops.appendNode('artifactId', 'tensorflow-lite-select-tf-ops')
