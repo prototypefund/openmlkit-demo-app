@@ -56,10 +56,12 @@ fun resizeWithPadding(
 
     val resized = resize(image, resizeConfig.ratio)
 
-    val padded = pad(resized,
+    val padded = pad(
+        resized,
         padRight = resizeConfig.padRight,
         padBottom = resizeConfig.padBottom,
-        repeatEdge = repeatEdge)
+        repeatEdge = repeatEdge
+    )
 
     return Pair(padded, resizeConfig)
 }

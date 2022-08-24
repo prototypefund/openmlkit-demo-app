@@ -4,7 +4,6 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 
-
 private fun repeatColumn(image: Bitmap, sourceColumn: Int, targetColumns: IntRange) {
     if (targetColumns.isEmpty())
         return
@@ -31,7 +30,10 @@ private fun repeatRow(image: Bitmap, sourceRow: Int, targetRows: IntRange) {
 
 fun pad(
     image: Bitmap,
-    padLeft: Int = 0, padTop: Int = 0, padRight: Int = 0, padBottom: Int = 0,
+    padLeft: Int = 0,
+    padTop: Int = 0,
+    padRight: Int = 0,
+    padBottom: Int = 0,
     repeatEdge: Boolean = false
 ): Bitmap {
 
@@ -51,16 +53,16 @@ fun pad(
 
     if (repeatEdge) {
         // fill padLeft with first column of original image
-        repeatColumn(padded,padLeft+1,0 until padLeft)
+        repeatColumn(padded, padLeft + 1, 0 until padLeft)
 
         // fill padRight with last column of original image
-        repeatColumn(padded,image.width - 1,image.width until image.width + padRight)
+        repeatColumn(padded, image.width - 1, image.width until image.width + padRight)
 
         // fill padTop with first row of original image
-        repeatRow(padded,padTop+1,0 until padTop)
+        repeatRow(padded, padTop + 1, 0 until padTop)
 
         // fill padBottom with last row of original image
-        repeatRow(padded,image.height - 1,image.height until image.height + padBottom)
+        repeatRow(padded, image.height - 1, image.height until image.height + padBottom)
     }
 
     return padded

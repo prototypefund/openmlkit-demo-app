@@ -44,7 +44,8 @@ class RecognitionModel(val model: ImageModel) {
             val baseModel = ImageModel.initialize(
                 RECOGNITION_MODEL_PATH,
                 context,
-                hasGPUSupport = false)
+                hasGPUSupport = false
+            )
             return RecognitionModel(baseModel)
         }
     }

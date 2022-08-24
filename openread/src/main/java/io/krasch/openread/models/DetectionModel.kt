@@ -125,7 +125,8 @@ class DetectionModel(val model: ImageModel) {
             val baseModel = ImageModel.initialize(
                 DETECTION_MODEL_PATH,
                 context,
-                hasGPUSupport = true)
+                hasGPUSupport = true
+            )
             return DetectionModel(baseModel)
         }
     }
