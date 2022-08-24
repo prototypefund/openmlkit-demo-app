@@ -45,7 +45,8 @@ fun resize(image: Bitmap, ratio: Double): Bitmap {
 fun resizeWithPadding(
     image: Bitmap,
     targetWidth: Int,
-    targetHeight: Int
+    targetHeight: Int,
+    repeatEdge: Boolean = false
 ): Pair<Bitmap, ResizeConfig> {
 
     val sizeOriginal = ImageDimensions(image.width, image.height)
@@ -54,7 +55,11 @@ fun resizeWithPadding(
     val resizeConfig = calculateResizeConfig(sizeOriginal, sizeTarget)
 
     val resized = resize(image, resizeConfig.ratio)
-    val padded = pad(resized, right = resizeConfig.padRight, bottom = resizeConfig.padBottom)
+
+    val padded = pad(resized,
+        padRight = resizeConfig.padRight,
+        padBottom = resizeConfig.padBottom,
+        repeatEdge = repeatEdge)
 
     return Pair(padded, resizeConfig)
 }

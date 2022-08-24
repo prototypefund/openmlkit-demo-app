@@ -57,7 +57,7 @@ class TestRotateAndCutout {
         val bitmap = bitmapClockwise
         val rect = rectClockwise
 
-        val paddedBitmap = pad(bitmap, left = 10.0, top = 17.0, right = 3.0, bottom = 200.0)
+        val paddedBitmap = pad(bitmap, padLeft = 10.0, padTop = 17.0, padRight = 3.0, padBottom = 200.0)
         val adjustedRect = AngledRectangle(
             rect.bottomLeft + Point(10, 17),
             rect.width,
@@ -76,7 +76,7 @@ class TestRotateAndCutout {
         val bitmap = bitmapCounterClockwise
         val rect = rectCounterClockwise
 
-        val paddedBitmap = pad(bitmap, left = 220.0, top = 2.0, right = 900.0, bottom = 2.0)
+        val paddedBitmap = pad(bitmap, padLeft = 220.0, padTop = 2.0, padRight = 900.0, padBottom = 2.0)
         val adjustedRect = AngledRectangle(
             rect.bottomLeft + Point(220, 2),
             rect.width,

@@ -14,7 +14,7 @@ class RecognitionModel(val model: ImageModel) {
     suspend fun run(bitmap: Bitmap): String {
 
         // preprocessing
-        val (resized, _) = resizeWithPadding(bitmap, 200, 31)
+        val (resized, _) = resizeWithPadding(bitmap, 200, 31, repeatEdge = true)
 
         // run model
         val charIndices = model.predict(resized)[0]

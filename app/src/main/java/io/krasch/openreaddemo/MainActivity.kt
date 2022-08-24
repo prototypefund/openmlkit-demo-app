@@ -1,12 +1,19 @@
 package io.krasch.openreaddemo
 
 import android.annotation.SuppressLint
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.*
 import com.google.android.material.tabs.TabLayoutMediator
+import io.krasch.openread.geometry.types.Angle
+import io.krasch.openread.geometry.types.AngledRectangle
+import io.krasch.openread.geometry.types.Point
+import io.krasch.openread.image.resize
+import io.krasch.openread.image.resizeWithPadding
+import io.krasch.openread.image.rotateAndCutout
 import io.krasch.openreaddemo.databinding.ActivityMainBinding
 import io.krasch.openreaddemo.image.PickImageResultContract
 import io.krasch.openreaddemo.image.RecognitionResultsDrawer
