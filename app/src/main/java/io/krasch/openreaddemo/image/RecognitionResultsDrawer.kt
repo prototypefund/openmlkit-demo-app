@@ -23,22 +23,24 @@ class RecognitionResultsDrawer(val original: Bitmap){
 
 
     private val solidLinePaint = Paint().apply {
-        color = Color.GREEN
+        color = Color.parseColor("#4e2780")
         style = Paint.Style.STROKE
         strokeWidth = 10f
     }
 
     private val dashedLinePaint = Paint(solidLinePaint).apply {
+        color = Color.GREEN
+        strokeWidth = 10f
         pathEffect = DashPathEffect(floatArrayOf(10f, 10f, 10f, 10f), 0f)
     }
 
     private val textPaint = Paint().apply {
-        color = Color.parseColor("#263d8c")
+        color = Color.parseColor("#4e2780")
         textSize = 50f
     }
 
     private val textBackgroundPaint = Paint().apply {
-        color = Color.parseColor("#eeeeee")
+        color = Color.parseColor("#ddd9e4ea")
         //alpha = 100
         style = Paint.Style.FILL
     }

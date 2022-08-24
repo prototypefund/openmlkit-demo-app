@@ -1,7 +1,6 @@
 package io.krasch.openreaddemo
 
 import android.annotation.SuppressLint
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
@@ -28,6 +27,10 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        setSupportActionBar(binding.toolbar)
+        supportActionBar?.setLogo(R.drawable.openlens)
+        supportActionBar?.setDisplayUseLogoEnabled(true);
 
         // initialise tabs
         val adapter = ImageTabAdapter(listOf("original", "results", "heatmap"))
