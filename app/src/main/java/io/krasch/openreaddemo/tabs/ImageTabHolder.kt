@@ -4,7 +4,6 @@ import android.graphics.Bitmap
 import androidx.recyclerview.widget.RecyclerView
 import io.krasch.openreaddemo.databinding.ImageTabBinding
 
-
 class ImageTabHolder(private val binding: ImageTabBinding) :
     RecyclerView.ViewHolder(binding.root) {
 

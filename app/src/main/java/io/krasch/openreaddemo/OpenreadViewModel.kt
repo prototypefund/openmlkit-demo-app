@@ -11,15 +11,11 @@ import io.krasch.openread.geometry.types.AngledRectangle
 import io.krasch.openread.image.rotateAndCutout
 import io.krasch.openread.models.DetectionModel
 import io.krasch.openread.models.RecognitionModel
-import io.krasch.openread.tflite.fileToByteBuffer
-import java.nio.MappedByteBuffer
-
 
 data class TextRecognitionResult(
     val box: AngledRectangle,
     val text: String?
 )
-
 
 fun <T, R> List<T>.zipWithDefault(other: List<R>, default: R): List<Pair<T, R>> {
     require(this.size >= other.size)
@@ -49,7 +45,6 @@ class OpenreadViewModel(application: Application) : AndroidViewModel(application
         statusInternal.value = " "
     }
 
-
     fun triggerTextRecognition(bitmap: Bitmap) {
         // have already started the work on this image, no need to do it again
         if (bitmap.sameAs(imageInternal.value))
@@ -75,7 +70,7 @@ class OpenreadViewModel(application: Application) : AndroidViewModel(application
             statusInternal.value = " "
 
             liveData {
-                val (heatmap, boxes) = detections
+                val (_, boxes) = detections
 
                 val words = mutableListOf<String>()
                 if (image.sameAs(imageInternal.value)) {
@@ -83,7 +78,8 @@ class OpenreadViewModel(application: Application) : AndroidViewModel(application
                         Pair(
                             image,
                             boxes.zipWithDefault(words, null)
-                                .map { TextRecognitionResult(it.first, it.second) })
+                                .map { TextRecognitionResult(it.first, it.second) }
+                        )
                     )
                 }
 
@@ -105,7 +101,8 @@ class OpenreadViewModel(application: Application) : AndroidViewModel(application
                         Pair(
                             image,
                             boxes.zipWithDefault(words, null)
-                                .map { TextRecognitionResult(it.first, it.second) })
+                                .map { TextRecognitionResult(it.first, it.second) }
+                        )
                     )
                     if (i + 1 == boxes.size)
                         statusInternal.value = " "

@@ -1,17 +1,15 @@
 package io.krasch.openreaddemo.tabs
 
 import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import io.krasch.openreaddemo.databinding.ImageTabBinding
 
-
 class ImageTabAdapter(private val tabs: List<String>) : RecyclerView.Adapter<ImageTabHolder>() {
 
-    private val images = MutableList<Bitmap?>(tabs.size) {null}
-    private val nameToPosition = tabs.withIndex().associate{ it.value to it.index }
+    private val images = MutableList<Bitmap?>(tabs.size) { null }
+    private val nameToPosition = tabs.withIndex().associate { it.value to it.index }
 
     init {
         this.setHasStableIds(true)
@@ -19,9 +17,10 @@ class ImageTabAdapter(private val tabs: List<String>) : RecyclerView.Adapter<Ima
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageTabHolder {
         val binding = ImageTabBinding.inflate(
-            LayoutInflater.from(parent.context) ,
+            LayoutInflater.from(parent.context),
             parent,
-            false)
+            false
+        )
 
         return ImageTabHolder(binding)
     }
@@ -37,7 +36,7 @@ class ImageTabAdapter(private val tabs: List<String>) : RecyclerView.Adapter<Ima
         return images[position]
     }
 
-    fun setImage(tabName: String, bitmap: Bitmap){
+    fun setImage(tabName: String, bitmap: Bitmap) {
         val position = getTabPosition(tabName)
         images[position] = bitmap
         notifyItemChanged(position)
@@ -52,7 +51,7 @@ class ImageTabAdapter(private val tabs: List<String>) : RecyclerView.Adapter<Ima
         return nameToPosition[tabName]!!
     }
 
-    fun redrawTab(tabName: String){
+    fun redrawTab(tabName: String) {
         val position = getTabPosition(tabName)
         notifyItemChanged(position)
     }

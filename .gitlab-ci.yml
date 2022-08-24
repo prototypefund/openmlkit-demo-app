@@ -10,6 +10,9 @@ test:
     - ./gradlew -Pci --console=plain :openread:lintDebug -PbuildDir=lint
     - ./gradlew -Pci --console=plain :openread:ktlintCheck
     - ./gradlew -Pci --console=plain :openread:test
+    - ./gradlew -Pci --console=plain :app:lintDebug -PbuildDir=lint
+    - ./gradlew -Pci --console=plain :app:ktlintCheck
+    - ./gradlew -Pci --console=plain :app:test
 
 publish:
   stage: publish

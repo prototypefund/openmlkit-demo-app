@@ -20,7 +20,8 @@ fun getBitmapFromURI(contentResolver: ContentResolver, uri: Uri): Bitmap {
                 source,
                 ImageDecoder.OnHeaderDecodedListener { decoder, _, _ ->
                     decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
-                })
+                }
+            )
         }
     }
 }

@@ -1,19 +1,11 @@
 package io.krasch.openreaddemo
 
 import android.annotation.SuppressLint
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.*
 import com.google.android.material.tabs.TabLayoutMediator
-import io.krasch.openread.geometry.types.Angle
-import io.krasch.openread.geometry.types.AngledRectangle
-import io.krasch.openread.geometry.types.Point
-import io.krasch.openread.image.resize
-import io.krasch.openread.image.resizeWithPadding
-import io.krasch.openread.image.rotateAndCutout
 import io.krasch.openreaddemo.databinding.ActivityMainBinding
 import io.krasch.openreaddemo.image.PickImageResultContract
 import io.krasch.openreaddemo.image.RecognitionResultsDrawer
@@ -21,12 +13,10 @@ import io.krasch.openreaddemo.image.getBitmapFromURI
 import io.krasch.openreaddemo.tabs.ImageTabAdapter
 import io.krasch.openreaddemo.tabs.disableAnimations
 
-
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private val viewModel: OpenreadViewModel by viewModels()
-
 
     @SuppressLint("NewApi")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,7 +27,7 @@ class MainActivity : AppCompatActivity() {
 
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setLogo(R.drawable.openlens)
-        supportActionBar?.setDisplayUseLogoEnabled(true);
+        supportActionBar?.setDisplayUseLogoEnabled(true)
 
         // initialise tabs
         val adapter = ImageTabAdapter(listOf("original", "results", "heatmap"))
@@ -56,30 +46,30 @@ class MainActivity : AppCompatActivity() {
             binding.viewPager.setCurrentItem(adapter.getTabPosition("results"), false)
         }
 
-        viewModel.results.observe(this, Observer { results ->
+        viewModel.results.observe(this) { results ->
             adapter.getImage("results")?.run {
                 val drawer = RecognitionResultsDrawer(this)
                 drawer.drawResults(results)
-                //adapter.redrawTab("results")
+                // adapter.redrawTab("results")
                 adapter.setImage("results", drawer.image)
             }
-        })
+        }
 
-        viewModel.image.observe(this, Observer { image ->
+        viewModel.image.observe(this) { image ->
             adapter.setImage("original", image)
             adapter.setImage("results", image)
 
             binding.imageTabs.visibility = View.VISIBLE
             binding.viewPager.setCurrentItem(adapter.getTabPosition("results"), false)
-        })
+        }
 
-        viewModel.heatmap.observe(this, Observer { heatmap ->
+        viewModel.heatmap.observe(this) { heatmap ->
             adapter.setImage("heatmap", heatmap)
-        })
+        }
 
-        viewModel.status.observe(this, Observer { status ->
+        viewModel.status.observe(this) { status ->
             binding.statusBar.text = status
-        })
+        }
 
         // when the user clicks the button and selects an image, trigger the OCR
         val pickImage = registerForActivityResult(PickImageResultContract()) { uri ->

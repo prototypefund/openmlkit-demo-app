@@ -7,20 +7,17 @@ import android.graphics.DashPathEffect
 import android.graphics.Paint
 import android.graphics.Rect
 import android.graphics.RectF
-import android.util.Log
 import io.krasch.openread.geometry.types.AngledRectangle
 import io.krasch.openreaddemo.TextRecognitionResult
 import kotlin.math.min
 
-
 // todo maybe this should take a mutable bitmap instead to make code more obvious?
-class RecognitionResultsDrawer(val original: Bitmap){
+class RecognitionResultsDrawer(val original: Bitmap) {
     private val mutable: Bitmap = original.copy(Bitmap.Config.ARGB_8888, true)
     private val canvas = Canvas(mutable)
 
     val image: Bitmap
         get() = mutable
-
 
     private val solidLinePaint = Paint().apply {
         color = Color.parseColor("#4e2780")
@@ -41,12 +38,12 @@ class RecognitionResultsDrawer(val original: Bitmap){
 
     private val textBackgroundPaint = Paint().apply {
         color = Color.parseColor("#ddd9e4ea")
-        //alpha = 100
+        // alpha = 100
         style = Paint.Style.FILL
     }
 
     fun drawResults(results: List<TextRecognitionResult>) {
-        results.map {(box, text) -> drawResult(box, text) }
+        results.map { (box, text) -> drawResult(box, text) }
     }
 
     private fun drawResult(box: AngledRectangle, text: String?) {
@@ -62,7 +59,7 @@ class RecognitionResultsDrawer(val original: Bitmap){
         val cornerRadius = min(box.width, box.height).toFloat() * 0.1f
 
         // text recognition has not run yet
-        if (text == null){
+        if (text == null) {
             // draw just a dashed bounding box, no text to be drawn
             canvas.drawRoundRect(translatedBox, cornerRadius, cornerRadius, dashedLinePaint)
         }
@@ -83,7 +80,6 @@ class RecognitionResultsDrawer(val original: Bitmap){
 
         canvas.restore()
     }
-
 
     private fun writeText(canvas: Canvas, boxWidth: Float, boxHeight: Float, text: String) {
         // measure how large the text would be with our default text paint
