@@ -21,7 +21,7 @@ const val THRESHOLD_TEXT_FIRST_PASS = 0.4
 const val THRESHOLD_TEXT_SECOND_PASS = 0.7
 const val THRESHOLD_LINK = 0.2
 
-const val DETECTION_MODEL_PATH = "craft-mini-126__epoch70_w720xh960.tflite"
+const val DETECTION_MODEL_PATH = "craft-mini-126__epoch30_w720xh960.tflite"
 
 data class DetectionResult(
     val heatmap: Bitmap,

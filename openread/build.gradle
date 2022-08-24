@@ -42,7 +42,7 @@ android {
 }
 
 task downloadModels(type: Download) {
-    src(['https://storage.googleapis.com/openreadmodels/craft-mini-126__epoch70_w720xh960.tflite',
+    src(['https://storage.googleapis.com/openreadmodels/craft-mini-126__epoch30_w720xh960.tflite',
          'https://storage.googleapis.com/openreadmodels/lite-model_keras-ocr_float16_2.tflite'])
     dest 'src/main/assets'
     overwrite false
