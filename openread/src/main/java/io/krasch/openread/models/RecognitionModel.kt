@@ -38,6 +38,8 @@ class RecognitionModel(val model: ImageModel) {
     }
 
     companion object {
+
+        // todo is it really a good idea to require the context here?
         suspend fun initialize(context: Context): RecognitionModel {
             val baseModel = ImageModel.initialize(
                 RECOGNITION_MODEL_PATH,

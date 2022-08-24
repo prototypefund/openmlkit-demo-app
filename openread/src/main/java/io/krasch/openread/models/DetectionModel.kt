@@ -120,6 +120,7 @@ class DetectionModel(val model: ImageModel) {
     }
 
     companion object {
+        // todo is it really a good idea to require the context here?
         suspend fun initialize(context: Context): DetectionModel {
             val baseModel = ImageModel.initialize(
                 DETECTION_MODEL_PATH,
