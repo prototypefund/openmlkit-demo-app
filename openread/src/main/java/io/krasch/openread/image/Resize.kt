@@ -67,7 +67,7 @@ fun resizeWithPadding(
 }
 
 fun undoResizeWithPadding(image: Bitmap, resizeConfig: ResizeConfig): Bitmap {
-    val imageWithoutPadding = unpad(image, right = resizeConfig.padRight, top = resizeConfig.padBottom)
+    val imageWithoutPadding = unpad(image, right = resizeConfig.padRight, bottom = resizeConfig.padBottom)
     val imageOriginalSize = resize(imageWithoutPadding, 1.0 / resizeConfig.ratio)
     return imageOriginalSize
 }
