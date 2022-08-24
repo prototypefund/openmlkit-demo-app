@@ -72,6 +72,8 @@ class OpenreadViewModel(application: Application) : AndroidViewModel(application
     private val recognitionResults = recognitionModel.switchMap { model ->
         detectionResults.switchMap { (image, detections) ->
 
+            statusInternal.value = " "
+
             liveData {
                 val (heatmap, boxes) = detections
 
