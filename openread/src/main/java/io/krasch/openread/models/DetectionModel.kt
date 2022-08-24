@@ -1,5 +1,6 @@
 package io.krasch.openread.models
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
 import io.krasch.openread.geometry.algorithms.calculateConvexHull
@@ -14,14 +15,13 @@ import io.krasch.openread.image.makeColourHeatmap
 import io.krasch.openread.image.resizeWithPadding
 import io.krasch.openread.image.undoResizeWithPadding
 import io.krasch.openread.tflite.ImageModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import java.nio.MappedByteBuffer
 import kotlin.math.max
 
 const val THRESHOLD_TEXT_FIRST_PASS = 0.4
 const val THRESHOLD_TEXT_SECOND_PASS = 0.7
 const val THRESHOLD_LINK = 0.2
+
+const val DETECTION_MODEL_PATH = "craft-mini-126__epoch70_w720xh960.tflite"
 
 data class DetectionResult(
     val heatmap: Bitmap,
@@ -120,13 +120,12 @@ class DetectionModel(val model: ImageModel) {
     }
 
     companion object {
-        suspend fun initialize(modelFile: MappedByteBuffer): DetectionModel {
-
-            val model = withContext(Dispatchers.IO) {
-                ImageModel(modelFile, hasGPUSupport = true)
-            }
-
-            return DetectionModel(model)
+        suspend fun initialize(context: Context): DetectionModel {
+            val baseModel = ImageModel.initialize(
+                DETECTION_MODEL_PATH,
+                context,
+                hasGPUSupport = true)
+            return DetectionModel(baseModel)
         }
     }
 }

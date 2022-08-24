@@ -1,13 +1,13 @@
 package io.krasch.openread.models
 
+import android.content.Context
 import android.graphics.Bitmap
 import io.krasch.openread.image.resizeWithPadding
 import io.krasch.openread.tflite.ImageModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import java.nio.MappedByteBuffer
 
 const val ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz"
+
+const val RECOGNITION_MODEL_PATH = "lite-model_keras-ocr_float16_2.tflite"
 
 class RecognitionModel(val model: ImageModel) {
 
@@ -38,11 +38,12 @@ class RecognitionModel(val model: ImageModel) {
     }
 
     companion object {
-        suspend fun initialize(modelFile: MappedByteBuffer): RecognitionModel {
-            val model = withContext(Dispatchers.IO) {
-                ImageModel(modelFile, hasGPUSupport = false)
-            }
-            return RecognitionModel(model)
+        suspend fun initialize(context: Context): RecognitionModel {
+            val baseModel = ImageModel.initialize(
+                RECOGNITION_MODEL_PATH,
+                context,
+                hasGPUSupport = false)
+            return RecognitionModel(baseModel)
         }
     }
 }

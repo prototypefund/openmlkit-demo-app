@@ -14,9 +14,6 @@ import io.krasch.openread.models.RecognitionModel
 import io.krasch.openread.tflite.fileToByteBuffer
 import java.nio.MappedByteBuffer
 
-const val DETECTION_MODEL_PATH = "craft-mini-126__epoch70_w720xh960.tflite"
-const val RECOGNITION_MODEL_PATH = "lite-model_keras-ocr_float16_2.tflite"
-
 
 data class TextRecognitionResult(
     val box: AngledRectangle,
@@ -37,16 +34,12 @@ fun <T, R> List<T>.zipWithDefault(other: List<R>, default: R): List<Pair<T, R>> 
 
 class OpenreadViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val detectionModel = loadModelFile(DETECTION_MODEL_PATH).let {
-        liveData {
-            emit(DetectionModel.initialize(it))
-        }
+    private val detectionModel = liveData {
+        emit(DetectionModel.initialize(getApplication<Application>().applicationContext))
     }
 
-    private val recognitionModel = loadModelFile(RECOGNITION_MODEL_PATH).let {
-        liveData {
-            emit(RecognitionModel.initialize(it))
-        }
+    private val recognitionModel = liveData {
+        emit(RecognitionModel.initialize(getApplication<Application>().applicationContext))
     }
 
     private val imageInternal = MutableLiveData<Bitmap>()
@@ -83,8 +76,13 @@ class OpenreadViewModel(application: Application) : AndroidViewModel(application
                 val (heatmap, boxes) = detections
 
                 val words = mutableListOf<String>()
-                if (image.sameAs(imageInternal.value)){
-                    emit(Pair(image, boxes.zipWithDefault(words, null).map { TextRecognitionResult(it.first, it.second) }))
+                if (image.sameAs(imageInternal.value)) {
+                    emit(
+                        Pair(
+                            image,
+                            boxes.zipWithDefault(words, null)
+                                .map { TextRecognitionResult(it.first, it.second) })
+                    )
                 }
 
                 for (i in boxes.indices) {
@@ -93,7 +91,7 @@ class OpenreadViewModel(application: Application) : AndroidViewModel(application
                     if (!image.sameAs(imageInternal.value))
                         break
 
-                    statusInternal.value = "Reading text (${i+1}/${boxes.size})"
+                    statusInternal.value = "Reading text (${i + 1}/${boxes.size})"
 
                     val cutout = rotateAndCutout(image, box)
                     words.add(model.run(cutout))
@@ -101,8 +99,13 @@ class OpenreadViewModel(application: Application) : AndroidViewModel(application
                     if (!image.sameAs(imageInternal.value))
                         break
 
-                    emit(Pair(image, boxes.zipWithDefault(words, null).map { TextRecognitionResult(it.first, it.second) }))
-                    if (i+1 == boxes.size)
+                    emit(
+                        Pair(
+                            image,
+                            boxes.zipWithDefault(words, null)
+                                .map { TextRecognitionResult(it.first, it.second) })
+                    )
+                    if (i + 1 == boxes.size)
                         statusInternal.value = " "
                 }
             }
@@ -125,11 +128,5 @@ class OpenreadViewModel(application: Application) : AndroidViewModel(application
             if (image.sameAs(imageInternal.value))
                 emit(recognitions)
         }
-    }
-
-
-    private fun loadModelFile(path: String): MappedByteBuffer {
-        val context = getApplication<Application>().applicationContext
-        return fileToByteBuffer(context.assets.openFd(path))
     }
 }

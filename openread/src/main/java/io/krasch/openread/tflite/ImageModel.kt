@@ -1,6 +1,8 @@
 package io.krasch.openread.tflite
 
+import android.content.Context
 import android.graphics.Bitmap
+import io.krasch.openread.models.DETECTION_MODEL_PATH
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.tensorflow.lite.DataType
@@ -91,5 +93,21 @@ open class ImageModel(modelFile: MappedByteBuffer, hasGPUSupport: Boolean = fals
         withContext(Dispatchers.IO) {
             model.run(input, output)
         }
+    }
+
+    companion object {
+        suspend fun initialize(
+            assetsPath: String,
+            context: Context,
+            hasGPUSupport: Boolean
+        ): ImageModel {
+            return withContext(Dispatchers.IO) {
+                val file = context.assets.openFd(assetsPath)
+                val weights = fileToByteBuffer(file)
+                file.close()
+                ImageModel(weights, hasGPUSupport)
+            }
+        }
+
     }
 }
