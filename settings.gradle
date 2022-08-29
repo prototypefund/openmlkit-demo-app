@@ -6,20 +6,6 @@ pluginManagement {
     }
 }
 
-def tokenName = null
-def tokenValue = null
-
-// running locally
-if (System.getenv("CI_JOB_TOKEN") == null){
-    tokenName = 'Private-Token'
-    tokenValue = gitLabPrivateToken
-}
-// running on CI
-else {
-    tokenName = 'Job-Token'
-    tokenValue = System.getenv("CI_JOB_TOKEN")
-}
-
 
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
@@ -28,13 +14,6 @@ dependencyResolutionManagement {
         mavenCentral()
         maven {
             url "https://gitlab.com/api/v4/projects/38250497/packages/maven"
-            credentials(HttpHeaderCredentials) {
-                name = tokenName
-                value = tokenValue
-            }
-            authentication {
-                header(HttpHeaderAuthentication)
-            }
         }
     }
 }

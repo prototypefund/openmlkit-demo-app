@@ -6,16 +6,16 @@ plugins {
     id 'org.jlleitschuh.gradle.ktlint' version '10.3.0'
 }
 
-// todo this same code also appears in settings.gradle, possible to just import from there
+// token variables are needed to publish the library to the gitlab maven repository
 def tokenName = null
 def tokenValue = null
 
-// running locally
+// publishing from local machine
 if (System.getenv("CI_JOB_TOKEN") == null){
     tokenName = 'Private-Token'
     tokenValue = gitLabPrivateToken
 }
-// running on CI
+// publishing from gitlab CI
 else {
     tokenName = 'Job-Token'
     tokenValue = System.getenv("CI_JOB_TOKEN")
