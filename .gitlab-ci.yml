@@ -28,7 +28,7 @@ publish-library:
 # 1. create git tag to make new release of the library
 # 2. update app/build.gradle to use that new release and commit
 # 3. trigger the job below to release the app with same version number as latest release of the library
-.publish-app:
+publish-app:
   stage: publish-app
   rules:
     - when: manual
