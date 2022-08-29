@@ -34,7 +34,7 @@ implementation 'io.krasch:openread:0.0.7'
 
 ```kotlin
 import android.graphics.BitmapFactory
-import io.krasch.openread.Openread
+import io.krasch.openread.models.Openread
 
 // initialize the library
 // the context is only used to load the necessary files, no reference to it is kept
