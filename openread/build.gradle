@@ -52,9 +52,9 @@ task downloadModels(type: Download) {
 preBuild.dependsOn downloadModels
 
 dependencies {
-    implementation 'org.tensorflow:tensorflow-lite:2.8.0'
-    implementation 'org.tensorflow:tensorflow-lite-select-tf-ops:2.8.0'
-    implementation 'org.tensorflow:tensorflow-lite-gpu:2.8.0'
+    implementation 'org.tensorflow:tensorflow-lite:2.9.0'
+    implementation 'org.tensorflow:tensorflow-lite-select-tf-ops:2.9.0'
+    implementation 'org.tensorflow:tensorflow-lite-gpu:2.9.0'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
 
     testImplementation 'junit:junit:4.13.2'
