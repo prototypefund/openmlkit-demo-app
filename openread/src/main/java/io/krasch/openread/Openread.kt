@@ -7,9 +7,10 @@ import io.krasch.openread.image.rotateAndCutout
 import io.krasch.openread.models.DetectionModel
 import io.krasch.openread.models.RecognitionModel
 
-
-class Openread(private val detectionModel: DetectionModel,
-               private val recognitionModel: RecognitionModel) {
+class Openread(
+    private val detectionModel: DetectionModel,
+    private val recognitionModel: RecognitionModel
+) {
 
     suspend fun run(image: Bitmap): List<Pair<AngledRectangle, String>> {
         val detections = detectionModel.run(image)
@@ -22,7 +23,6 @@ class Openread(private val detectionModel: DetectionModel,
 
         return results
     }
-
 
     companion object {
         suspend fun initialize(context: Context): Openread {
