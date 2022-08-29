@@ -2,7 +2,8 @@ image: androidsdk/android-31
 
 stages:
   - test
-  - publish
+  - publish-library
+  - publish-app
 
 test:
   stage: test
@@ -14,11 +15,30 @@ test:
     - ./gradlew -Pci --console=plain :app:ktlintCheck
     - ./gradlew -Pci --console=plain :app:test
 
-publish:
-  stage: publish
+publish-library:
+  stage: publish-library
   only:
     - tags
   script:
     - export RELEASE_VERSION=$CI_COMMIT_TAG
     - ./gradlew -Pci --console=plain :openread:build
     - ./gradlew -Pci --console=plain publish
+
+publish-app:
+  stage: publish-app
+  only:
+    - tags
+  script:
+    - echo $SIGNING_KEYSTORE_FILE | base64 -d > android-signing-keystore.jks
+    - ./gradlew assembleRelease
+      -Pandroid.injected.signing.store.file=$(pwd)/android-signing-keystore.jks
+      -Pandroid.injected.signing.store.password=$SIGNING_KEYSTORE_PASSWORD
+      -Pandroid.injected.signing.key.alias=$SIGNING_KEY_ALIAS
+      -Pandroid.injected.signing.key.password=$SIGNING_KEY_PASSWORD
+    - cp app/build/outputs/apk/release/app-release.apk $(pwd)/openreaddemo-$CI_COMMIT_TAG.apk
+  after_script:
+    - rm android-signing-keystore.jks
+  artifacts:
+    paths:
+      - $(pwd)/openreaddemo-$CI_COMMIT_TAG.apk
+    expire_in: 1 week
