@@ -28,12 +28,12 @@ publish-library:
 # 1. create git tag to make new release of the library
 # 2. update app/build.gradle to use that new release and commit
 # 3. trigger the job below to release the app with same version number as latest release of the library
-publish-app:
+.publish-app:
   stage: publish-app
   rules:
     - when: manual
   script:
-    - LATEST_TAG=$(git tag --list | sort -V | tail -n1)
+    - export LATEST_TAG=$(git tag --list | sort -V | tail -n1)
     - echo $SIGNING_KEYSTORE_FILE | base64 -d > android-signing-keystore.jks
     - ./gradlew assembleRelease
       -Pandroid.injected.signing.store.file=$(pwd)/android-signing-keystore.jks
@@ -45,5 +45,5 @@ publish-app:
     - rm android-signing-keystore.jks
   artifacts:
     paths:
-      - $(pwd)/openreaddemo-$LATEST_TAG.apk
+      - "openreaddemo-*.apk"   # another hack: wildcard to avoid having to know $LATEST_TAG again
     expire_in: 1 week
