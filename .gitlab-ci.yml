@@ -24,21 +24,26 @@ publish-library:
     - ./gradlew -Pci --console=plain :openread:build
     - ./gradlew -Pci --console=plain publish
 
+# this one is a bit of a hack, to release the app you need to
+# 1. create git tag to make new release of the library
+# 2. update app/build.gradle to use that new release and commit
+# 3. trigger the job below to release the app with same version number as latest release of the library
 publish-app:
   stage: publish-app
-  only:
-    - tags
+  rules:
+    - when: manual
   script:
+    - LATEST_TAG=$(git tag --list | sort -V | tail -n1)
     - echo $SIGNING_KEYSTORE_FILE | base64 -d > android-signing-keystore.jks
     - ./gradlew assembleRelease
       -Pandroid.injected.signing.store.file=$(pwd)/android-signing-keystore.jks
       -Pandroid.injected.signing.store.password=$SIGNING_KEYSTORE_PASSWORD
       -Pandroid.injected.signing.key.alias=$SIGNING_KEY_ALIAS
       -Pandroid.injected.signing.key.password=$SIGNING_KEY_PASSWORD
-    - cp app/build/outputs/apk/release/app-release.apk $(pwd)/openreaddemo-$CI_COMMIT_TAG.apk
+    - cp app/build/outputs/apk/release/app-release.apk $(pwd)/openreaddemo-$LATEST_TAG.apk
   after_script:
     - rm android-signing-keystore.jks
   artifacts:
     paths:
-      - $(pwd)/openreaddemo-$CI_COMMIT_TAG.apk
+      - $(pwd)/openreaddemo-$LATEST_TAG.apk
     expire_in: 1 week
