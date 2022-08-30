@@ -49,11 +49,10 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
 
-    //implementation project(path: ':openread')    // use when developing library
-    implementation 'io.krasch:openread:0.0.8'  // use when working on app
+    //implementation project(path: ':openread') // use during development
+    implementation 'io.krasch:openread:0.0.8'   // use when releasing app
 
     implementation 'com.jsibbold:zoomage:1.3.1'
-    implementation project(path: ':openread')
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

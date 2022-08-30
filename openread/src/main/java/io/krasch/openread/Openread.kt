@@ -1,11 +1,13 @@
-package io.krasch.openread.models
+package io.krasch.openread
 
 import android.content.Context
 import android.graphics.Bitmap
 import io.krasch.openread.geometry.types.AngledRectangle
 import io.krasch.openread.image.rotateAndCutout
+import io.krasch.openread.models.DetectionModel
+import io.krasch.openread.models.RecognitionModel
 
-// todo located here because some duplicate package name issue when releasing app
+
 class Openread(
     private val detectionModel: DetectionModel,
     private val recognitionModel: RecognitionModel
