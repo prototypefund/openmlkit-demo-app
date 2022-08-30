@@ -28,7 +28,7 @@ dependencyResolutionManagement
 And add the library to your app's `build.gradle`
 
 ```groovy
-implementation 'io.krasch:openread:0.0.8'
+implementation 'io.krasch:openread:0.0.9'
 ```
 ## Example usage
 
