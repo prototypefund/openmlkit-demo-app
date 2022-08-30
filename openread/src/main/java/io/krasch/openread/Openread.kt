@@ -7,7 +7,6 @@ import io.krasch.openread.image.rotateAndCutout
 import io.krasch.openread.models.DetectionModel
 import io.krasch.openread.models.RecognitionModel
 
-
 class Openread(
     private val detectionModel: DetectionModel,
     private val recognitionModel: RecognitionModel
